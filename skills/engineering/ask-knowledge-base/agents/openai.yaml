@@ -1,0 +1,3 @@
+interface:
+  display_name: "Ask Knowledge Base"
+  short_description: "Explain a knowledge base rule in plain language, grounded in the KB"

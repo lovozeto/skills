@@ -1,0 +1,5 @@
+interface:
+  display_name: "Offload to Local"
+  short_description: "Route a task to the cheapest local model that clears the quality bar"
+policy:
+  allow_implicit_invocation: false

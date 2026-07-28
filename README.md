@@ -1,0 +1,60 @@
+# lovozeto/skills
+
+A collection of Claude Code skills for AI-assisted design and engineering workflows.
+
+## Install
+
+```bash
+npx skills add lovozeto/skills
+```
+
+Or globally (recommended — skills work across all projects):
+
+```bash
+npx skills add lovozeto/skills -g -y
+```
+
+## Skills
+
+### Engineering
+
+| Skill | What it does |
+|---|---|
+| `/offload-to-local` | Route token-heavy, low-reasoning tasks to a free local model |
+| `/ask-knowledge-base` | Explain a knowledge base rule in plain language |
+| `/workshop-skill` | Create or improve a skill with delegation awareness and QA built in |
+| `/write-for-model` | Build an optimized prompt for a specific local or delegation model |
+| `/commit` | Stage and commit following Conventional Commits |
+| `/kb-pipeline` | Research, update, or refresh a knowledge base with mandatory curation gates |
+| `/arbitrate` | Resolve a clash between UX intent and a verified technical constraint |
+| `/init-project` | Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md |
+
+### Productivity
+
+| Skill | What it does |
+|---|---|
+| `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
+
+## Setup
+
+Some skills require additional setup provided by
+[lobomorir-ai-setup](https://github.com/lovozeto/lobomorir-ai-setup):
+
+| Dependency | Used by |
+|---|---|
+| `ask-apple`, `ask-local` wrappers on PATH | `offload-to-local`, `write-for-model` |
+| `hardware.md` in active profile | `offload-to-local`, `workshop-skill` |
+| Knowledge base at `~/dev/claude-kb/` | `ask-knowledge-base`, `kb-pipeline` |
+| `preflight` on PATH | `init-project` |
+
+Without that setup, skills fall back gracefully — `offload-to-local` uses the Claude
+tier ladder, and `ask-knowledge-base` accepts a custom KB path at invocation time.
+
+## Complementary: mattpocock/skills
+
+These skills work well alongside the curated selection from
+[mattpocock/skills](https://github.com/mattpocock/skills):
+
+```bash
+npx skills add mattpocock/skills -g -y
+```

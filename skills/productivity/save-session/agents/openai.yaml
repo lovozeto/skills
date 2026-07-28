@@ -1,0 +1,5 @@
+interface:
+  display_name: "Save Session"
+  short_description: "Write end-of-session state to QUICK-STATE.md, log PRs, or reconcile memory"
+policy:
+  allow_implicit_invocation: false

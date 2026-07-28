@@ -1,0 +1,5 @@
+interface:
+  display_name: "Init Project"
+  short_description: "Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md"
+policy:
+  allow_implicit_invocation: false
