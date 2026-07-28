@@ -26,7 +26,9 @@ npx skills add lovozeto/skills -g -y
 | `/write-for-model` | Build an optimized prompt for a specific local or delegation model |
 | `/commit` | Stage and commit following Conventional Commits |
 | `/kb-pipeline` | Research, update, or refresh a knowledge base with mandatory curation gates |
+| `/update-knowledge-base` | Add or correct a single KB entry from a verified source URL |
 | `/arbitrate` | Resolve a clash between UX intent and a verified technical constraint |
+| `/benchmark-model` | Test a local model, measure quality and speed, update the task routing map |
 | `/init-project` | Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md |
 
 ### Productivity
@@ -34,6 +36,7 @@ npx skills add lovozeto/skills -g -y
 | Skill | What it does |
 |---|---|
 | `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
+| `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
 
 ## Setup
 

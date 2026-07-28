@@ -1,0 +1,5 @@
+interface:
+  display_name: "Benchmark Model"
+  short_description: "Test a local model, measure quality and speed, update the task routing map"
+policy:
+  allow_implicit_invocation: false
