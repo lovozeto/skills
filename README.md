@@ -38,6 +38,12 @@ npx skills add lovozeto/skills -g -y
 | `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
 | `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
 
+### Media
+
+| Skill | What it does |
+|---|---|
+| `/karaoke-builder` | Build/repair an UltraStar karaoke library — torrent (ultrastar-es.org) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
+
 ## Setup
 
 Some skills require additional setup provided by

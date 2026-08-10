@@ -1,0 +1,5 @@
+interface:
+  display_name: "Karaoke Builder"
+  short_description: "Build/repair an UltraStar karaoke library via torrent or AI forced-alignment"
+policy:
+  allow_implicit_invocation: true
