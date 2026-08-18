@@ -78,7 +78,7 @@ def generate(a,t):
     if not vid: return "no-source"
     # 1) video+audio en una pasada
     mp4=os.path.join(folder,f"{base}.mp4")
-    r=run(["yt-dlp","--no-warnings",*COOKIES,"--sleep-requests","2",
+    r=run(["yt-dlp","--no-warnings","--remote-components","ejs:github",*COOKIES,"--sleep-requests","2",
         "-f","bv*[vcodec^=avc1][height<=1080][ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b",
         "--merge-output-format","mp4","-o",mp4,f"https://youtu.be/{vid}"],900)
     if not os.path.exists(mp4): return f"dl-fail"

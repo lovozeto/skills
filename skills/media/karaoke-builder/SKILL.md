@@ -60,7 +60,7 @@ Edit these at the top of the scripts, or set the env vars, before running. See `
 - Pipeline dir (`KP`) — where the scripts + logs + backups live.
 - `USDX_USER` / `USDX_PASSWORD` — USDB login for `usdb_fetch.sh` (env only — never written to a file). Requires cloning usdx_scraper; see `references/usdb.md`.
 - qBittorrent *watched*/*completed* dirs, and `QBT_HOST` / `QBT_USER` / `QBT_PASS` (password from env only — never written to a file).
-- `IA_COOKIES` — `--cookies-from-browser firefox:<profile>` to avoid YouTube 429.
+- **YouTube downloads** now need cookies **+ a PO-token server + `--remote-components ejs:github`** — see `references/youtube-po-token.md` (required for `ia_gen.py` and USDB media). `IA_COOKIES` / `USDX_YT_COOKIES` carry the `--cookies-from-browser firefox:<profile>` part.
 
 ## Steps — common tasks
 

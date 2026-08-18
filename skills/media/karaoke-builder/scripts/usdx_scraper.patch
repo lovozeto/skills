@@ -15,7 +15,7 @@ index d741c30..63d43d4 100644
          if not r.ok: raise ConnectionError
  
 diff --git a/src/sources/media/Youtube.py b/src/sources/media/Youtube.py
-index 6243099..c166df2 100644
+index 6243099..1101f18 100644
 --- a/src/sources/media/Youtube.py
 +++ b/src/sources/media/Youtube.py
 @@ -41,7 +41,8 @@ class Youtube(MediaSourceBase):
@@ -28,17 +28,28 @@ index 6243099..c166df2 100644
              'outtmpl': f'{song_folder_path}/{song[1]}.mp4',
              'quiet': True,
              'nooverwrites': True,
-@@ -58,6 +59,13 @@ class Youtube(MediaSourceBase):
+@@ -58,8 +59,22 @@ class Youtube(MediaSourceBase):
  
      @staticmethod
      def download_song(url, yt_options) -> None:
-+        # PATCH: inject browser cookies to avoid YouTube 403/429. Env USDX_YT_COOKIES="firefox:/path/to/profile"
-+        import os as _os
+-        with yt_dlp.YoutubeDL(yt_options) as ydl:
+-            ydl.download([url])
++        # PATCH: use the yt-dlp CLI (subprocess) instead of the Python API. The API fails on YouTube
++        # with "The page needs to be reloaded" even with cookies, while the CLI works. Cookies come
++        # from env USDX_YT_COOKIES="firefox:/path/to/profile" (avoids the bot/403 challenge).
++        import os as _os, sys as _sys, subprocess as _sp
++        cmd = [_sys.executable, "-m", "yt_dlp", "--no-warnings", "--no-progress", "--remote-components", "ejs:github"]
++        if yt_options.get("format"): cmd += ["-f", yt_options["format"]]
++        if yt_options.get("outtmpl"): cmd += ["-o", yt_options["outtmpl"]]
++        if yt_options.get("merge_output_format"): cmd += ["--merge-output-format", yt_options["merge_output_format"]]
++        if yt_options.get("nooverwrites"): cmd += ["--no-overwrites"]
++        for _pp in yt_options.get("postprocessors", []):
++            if _pp.get("key") == "FFmpegExtractAudio":
++                cmd += ["-x", "--audio-format", _pp.get("preferredcodec", "mp3")]
 +        _c = _os.getenv("USDX_YT_COOKIES")
-+        if _c:
-+            _b, _, _p = _c.partition(":")
-+            yt_options = dict(yt_options)
-+            yt_options["cookiesfrombrowser"] = (_b, _p or None, None, None)
-         with yt_dlp.YoutubeDL(yt_options) as ydl:
-             ydl.download([url])
++        if _c: cmd += ["--cookies-from-browser", _c]
++        cmd.append(url)
++        _sp.run(cmd, check=True)
  
+     # Search for videos on YT and add links to song_list
+     @staticmethod

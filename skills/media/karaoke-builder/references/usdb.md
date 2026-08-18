@@ -57,9 +57,13 @@ cd ~/karaoke-pipeline/usdx_scraper && git apply <skill>/scripts/usdx_scraper.pat
 
 1. **Zip filename hash** — USDB now serves `user-playlist-<hash>.zip`; the scraper built the URL without the hash → 404 on every txt. The patch parses the real URL from the ZIP_SAVE page.
 2. **Video format** — it requested `bestvideo[ext=m4a]` (m4a is audio) → "Requested format is not available". The patch uses `avc1/mp4`.
-3. **YouTube cookies** — no cookies → 403 Forbidden. The patch injects `cookiesfrombrowser` from env `USDX_YT_COOKIES="firefox:<profile>"` (same trick as `ia_gen.py`). Set it before running.
+3. **YouTube media (cookies + PO token + JS challenge)** — the Python API failed with "The page needs to be reloaded"; the patch switches `download_song` to the yt-dlp **CLI** with `--remote-components ejs:github`, cookies from env `USDX_YT_COOKIES="firefox:<profile>"`, and the **bgutil PO-token server** running. Full setup in `references/youtube-po-token.md` — this is required for all YouTube downloads now (USDB media *and* `ia_gen.py`).
 
 Note: media download still fails per-song when the entry's `#VIDEO` URL is dead/region-locked — that's the entry's problem, not the pipeline. The **txt (human timing) always downloads**, which is the valuable part.
+
+## Replacing AI songs in bulk — usdb_replace.py
+
+`usdb_replace.py [limit]` reads `usdb_matches.csv`, and for every `exacto`/`por-titulo` row fetches the USDB version, finalizes it to the local name, backs up the AI folder, and swaps it in — **only if a complete song (txt + media) downloaded and validates**, otherwise it keeps the AI version. Excludes a keep-list (e.g. the first song you made). Needs the PO-token setup above.
 
 ## Same-language naming (foreign-language songs)
 
