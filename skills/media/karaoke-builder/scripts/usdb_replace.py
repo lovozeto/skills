@@ -24,6 +24,8 @@ for i, r in enumerate(todo, 1):
     folder, artist, title = r[0], r[1], r[2]
     dest = os.path.join(NAS, folder)
     if not os.path.isdir(dest): log(f"[{i}/{len(todo)}] SKIP (ya no está): {folder}"); skip += 1; continue
+    if not any("[Vocals]" in f for f in os.listdir(dest)):   # ya es humana (reemplazada) → no rehacer
+        skip += 1; continue
     log(f"[{i}/{len(todo)}] {folder}")
     shutil.rmtree(TMP, ignore_errors=True); os.makedirs(TMP)
     lst = f"{TMP}/q.txt"; open(lst, "w", encoding="utf-8").write(f"{artist} - {title}\n")
