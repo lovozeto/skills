@@ -1,0 +1,44 @@
+diff --git a/src/sources/lyrics/UsdbAnimuxDe.py b/src/sources/lyrics/UsdbAnimuxDe.py
+index d741c30..63d43d4 100644
+--- a/src/sources/lyrics/UsdbAnimuxDe.py
++++ b/src/sources/lyrics/UsdbAnimuxDe.py
+@@ -116,6 +116,11 @@ class UsdbAnimuxDe(LyricsSourceBase):
+         if not r.ok: raise ConnectionError
+         r = self.SESSION.get(self.ZIP_SAVE_URL)
+         if not r.ok: raise ConnectionError
++        # PATCH: USDB now appends a hash to the zip filename (e.g. user-playlist-<hash>.zip).
++        # The constructed download_url (no hash) 404s; parse the real URL from the ZIP_SAVE page.
++        import re as _re
++        _m = _re.search(r'(data/downloads/[^"\']+\.zip[^"\']*)', r.text)
++        download_url = 'https://usdb.animux.de/' + _m.group(1) if _m else download_url
+         r = self.SESSION.get(download_url)
+         if not r.ok: raise ConnectionError
+ 
+diff --git a/src/sources/media/Youtube.py b/src/sources/media/Youtube.py
+index 6243099..c166df2 100644
+--- a/src/sources/media/Youtube.py
++++ b/src/sources/media/Youtube.py
+@@ -41,7 +41,8 @@ class Youtube(MediaSourceBase):
+ 
+     def download_video(self, song:list, song_folder_path:str) -> str:
+         yt_opts_mp4 = {
+-            'format': f"bestvideo[height<={self.maximum_video_resolution}][ext=m4a]+bestaudio[ext=m4a]/best[height<={self.maximum_video_resolution}][ext=mp4]/best",
++            'format': f"bv*[vcodec^=avc1][height<={self.maximum_video_resolution}][ext=mp4]+ba[ext=m4a]/b[height<={self.maximum_video_resolution}][ext=mp4]/b",
++            'merge_output_format': 'mp4',
+             'outtmpl': f'{song_folder_path}/{song[1]}.mp4',
+             'quiet': True,
+             'nooverwrites': True,
+@@ -58,6 +59,13 @@ class Youtube(MediaSourceBase):
+ 
+     @staticmethod
+     def download_song(url, yt_options) -> None:
++        # PATCH: inject browser cookies to avoid YouTube 403/429. Env USDX_YT_COOKIES="firefox:/path/to/profile"
++        import os as _os
++        _c = _os.getenv("USDX_YT_COOKIES")
++        if _c:
++            _b, _, _p = _c.partition(":")
++            yt_options = dict(yt_options)
++            yt_options["cookiesfrombrowser"] = (_b, _p or None, None, None)
+         with yt_dlp.YoutubeDL(yt_options) as ydl:
+             ydl.download([url])
+ 

@@ -42,7 +42,7 @@ npx skills add lovozeto/skills -g -y
 
 | Skill | What it does |
 |---|---|
-| `/karaoke-builder` | Build/repair an UltraStar karaoke library — torrent (ultrastar-es.org) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
+| `/karaoke-builder` | Build/repair an UltraStar karaoke library — USDB / torrent (human-made) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
 
 ## Setup
 
