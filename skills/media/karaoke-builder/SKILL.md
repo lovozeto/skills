@@ -1,11 +1,13 @@
 ---
 name: karaoke-builder
-description: Build and repair an UltraStar Deluxe karaoke library. Download human-made songs from ultrastar-es.org by torrent, or generate missing ones with AI (yt-dlp video+audio → demucs stems → forced alignment against VERIFIED web lyrics, not Whisper transcription), all written to the UltraStar 1.1.0 standard and cleared by a single validation pass. Use when building, fixing, or extending karaoke songs for UltraStar / UltraStar WorldParty.
+description: Build and repair an UltraStar Deluxe karaoke library. Fetch each song in priority order — USDB (usdb.animux.de) first, then ultrastar-es.org torrents, then AI generation (yt-dlp video+audio → demucs stems → forced alignment against VERIFIED web lyrics, NOT Whisper transcription) — all written to the UltraStar 1.1.0 standard and cleared by one validation pass. Use when building, fixing, or extending karaoke songs for UltraStar / UltraStar WorldParty.
 ---
 
 # karaoke-builder — one library, one standard
 
-Human or AI, one bar. Songs come from a **human source** — USDB (`usdb.animux.de`, the big community DB — preferred) or ultrastar-es.org torrents — or from **AI generation** for whatever neither has. All converge on the same `organize → single validation → library` tail. There are **no sub-versions** — a song either passes or lands on a `revisar.txt` review list. Human-made songs are already well-timed and skip the AI align QA. All scripts ship in `scripts/`; the format spec, the full flow, and the USDB source live in `references/`.
+**Source priority, always in this order:** ① **USDB** (`usdb.animux.de` — biggest human DB) → ② **ultrastar-es.org torrents** (human) → ③ **AI generation** (only what neither has). Prefer human-made songs: they are already well-timed and **skip the AI align QA**. Everything converges on the same `organize → single validation → library` tail. There are **no sub-versions** — a song either passes or lands on a `revisar.txt` review list. All scripts ship in `scripts/`; the format spec, the full flow, the USDB source, and the YouTube setup live in `references/`.
+
+`fiesta_gen.py` runs this whole waterfall for a pack of new songs (USDB → misses to torrent/IA); `usdb_replace.py` upgrades existing AI songs to human USDB versions.
 
 ## The core idea (why this works)
 
@@ -66,6 +68,12 @@ Edit these at the top of the scripts, or set the env vars, before running. See `
 
 **Build a library:** `build_unified.py` → `usdb_fetch.sh <list> <out>` (USDB, most coverage) → `organize.py`; for what USDB lacks, `site_match.py` + torrent, then `ia_gen.py <misses>`; finally `organize.py` → `validate.py --all`.
 
+**Add a pack of new songs (the waterfall):** `fiesta_gen.py <Artist|Title list>` — USDB first, AI for the misses. Set `FIESTA_USDB_ONLY=1` to only do USDB and write the misses to `fiesta_misses.txt` for a manual ultrastar-es torrent pass before falling back to AI.
+
+**Upgrade AI → human:** `usdb_match.py` (search USDB for every AI song) → review `usdb_matches.csv` → `usdb_replace.py` swaps the confident matches for the human USDB version — skips songs already human, and keeps the AI one if USDB has no downloadable media or the result doesn't validate.
+
 **Fix all AI lyrics:** `qa_align_batch.py` then `qa_accents.py`, then `validate.py --all`; review `revisar.txt`.
 
-**Add songs:** append `Artist|Title` lines to a queue, cross with `build_unified.py`, then run the source decision. Verify any ambiguous title/dub with a quick web check before queueing — never invent a localized title.
+**Add songs manually:** append `Artist|Title` lines to a queue, cross with `build_unified.py`, then run the source decision. Verify any ambiguous title/dub with a quick web check before queueing — never invent a localized title.
+
+**Before any download:** start the YouTube PO-token server and set cookies (`references/youtube-po-token.md`) — without it, all yt-dlp media downloads fail with "The page needs to be reloaded".
