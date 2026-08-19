@@ -39,3 +39,7 @@ Every yt-dlp download command must include:
 | `Requested format is not available` (only some clients) | that player client exposed no formats without a token — not the format string |
 
 This is a moving target; when it breaks again, update yt-dlp + the bgutil provider first.
+
+## Gotcha: the server process name
+
+The server runs as `node build/main.js` (relative argv) — it does **not** contain the string "bgutil". A watchdog like `pgrep -f 'bgutil.*main.js'` will never match it, think the server is down, and spawn duplicates that die with `EADDRINUSE: address already in use :::4416` while the real one keeps working. Detect it by port instead: `curl -s http://127.0.0.1:4416/ping`. The server is stable on its own (hours of uptime) — you rarely need a watchdog at all.
