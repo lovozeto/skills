@@ -1,34 +1,27 @@
 # Model availability & the equivalence rule
 
-Read this in Phase 3. The mandatory-model field must name a model that can actually launch
-the agent on this machine. Never assume a model is present.
+Read this in Phase 3. The mandatory-model field is **Claude-first**: name a Claude tier as the
+base, then add a cross-provider note so the instruction stays coherent if the artifact runs
+under ChatGPT or OpenCode. **No local models.**
 
-## What to check, in order
+## Base: Claude tiers (always available)
+`haiku`, `sonnet`, `opus` — the safe baseline for any orchestrator/worker. This is what goes
+in `model:` when the artifact runs under Claude.
 
-1. **Claude tiers** — always available: `haiku`, `sonnet`, `opus`. These are the safe
-   fallback for any orchestrator/worker.
-2. **Local models** — read the active profile's `hardware.md` (set up by the machine's
-   AI-setup, e.g. `~/dev/claude-kb/` profile). It lists local models and wrappers. If there
-   is no profile, treat local delegation as **not configured** and do not wire it.
-3. **Cloud cross-provider** (ChatGPT, Kimi/Moonshot, OpenCode Zen) — available only if a
-   verified wrapper/credential exists on the machine. Without one, the route is `advisory`:
-   document it in the agent body but do not promise a real call.
+## Cross-provider note (coherence, not detection)
+You are not probing the machine for other providers. You are making the artifact's
+instructions portable: from `kb/model-catalog.md`, add the ChatGPT and OpenCode Zen (and, when
+relevant, Kimi) equivalents for the chosen role, marked `advisory` until `/refresh-forge-kb`
+verifies the exact ids. Example line in an agent body:
 
-## The equivalence rule
+> Model: `sonnet` (Claude base). If run under ChatGPT, use <equivalent>; under OpenCode, use
+> the <Zen equivalent>.
 
-If the model `kb/model-catalog.md` recommends for a role is **not** available:
-1. Look up the role (orchestrator vs worker) and the recommended model in the catalog's
-   **equivalence table**.
-2. Pick the **closest available** equivalent (same role tier, prefer same provider, then the
-   cheapest that clears the bar).
-3. If nothing equivalent is verifiably available, fall back to the Claude tier ladder and
-   **state in the output** that availability could not be verified and the fallback was used.
+## The equivalence rule (within Claude)
+If the recommended Claude tier does not fit (too weak/too costly for the role), step along the
+Claude ladder (`haiku` ↔ `sonnet` ↔ `opus`) to the cheapest tier that clears the bar, and
+**say so**. Never assume a specific cross-provider model exists — keep it `advisory` until
+verified.
 
-## Writing the field
-
-- Native Claude tier → put it in the agent/skill `model:` frontmatter.
-- Delegated cross-provider → leave `model:` as a Claude tier (or `inherit`) and record the
-  delegation route + provider + `tier: advisory|proven` in the agent body.
-
-The point of the whole rule is token economy without hallucination: pick the cheapest
-capable model that is real on this machine, and be explicit whenever you had to fall back.
+The point is token economy without hallucination: cheapest capable Claude tier as the base,
+plus coherent cross-provider guidance, and explicit about anything unverified.
