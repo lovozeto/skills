@@ -22,7 +22,6 @@ npx skills add lovozeto/skills -g -y
 |---|---|
 | `/offload-to-local` | Route token-heavy, low-reasoning tasks to a free local model |
 | `/ask-knowledge-base` | Explain a knowledge base rule in plain language |
-| `/workshop-skill` | Create or improve a skill with delegation awareness and QA built in |
 | `/write-for-model` | Build an optimized prompt for a specific local or delegation model |
 | `/commit` | Stage and commit following Conventional Commits |
 | `/kb-pipeline` | Research, update, or refresh a knowledge base with mandatory curation gates |
@@ -44,6 +43,21 @@ npx skills add lovozeto/skills -g -y
 |---|---|
 | `/karaoke-builder` | Build/repair an UltraStar karaoke library — USDB / torrent (human-made) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
 
+## Plugins
+
+This repository is also a plugin marketplace (`.claude-plugin/marketplace.json`).
+
+| Plugin | What it does |
+|---|---|
+| `skill-forge` | Guided wizard to design and build agents, skills, and plugins: zero-hole definition, complexity-based type decision, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, mandatory model per agent, and an HTML approval view. Supersedes `/workshop-skill`. |
+
+```bash
+/plugin marketplace add lovozeto/skills
+/plugin install skill-forge@lovozeto-skills
+```
+
+See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md).
+
 ## Setup
 
 Some skills require additional setup provided by
@@ -52,7 +66,7 @@ Some skills require additional setup provided by
 | Dependency | Used by |
 |---|---|
 | `ask-apple`, `ask-local` wrappers on PATH | `offload-to-local`, `write-for-model` |
-| `hardware.md` in active profile | `offload-to-local`, `workshop-skill` |
+| `hardware.md` in active profile | `offload-to-local`, `skill-forge` |
 | Knowledge base at `~/dev/claude-kb/` | `ask-knowledge-base`, `kb-pipeline` |
 | `preflight` on PATH | `init-project` |
 

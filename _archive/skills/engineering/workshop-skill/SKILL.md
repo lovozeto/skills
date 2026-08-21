@@ -7,6 +7,12 @@ argument-hint: "skill"
 
 # workshop-skill — create skills with delegation awareness
 
+> **ARCHIVED (2026-08-21).** Superseded by the `skill-forge` plugin (`/forge-wizard`), which
+> adds a zero-hole Definition Ledger, agent/skill/plugin decision, mandatory orchestrator +
+> single-task subagents, guardrail hooks, a live best-practices KB, mandatory model per
+> agent, and an HTML approval view. This file is kept for reference only. See
+> `plugins/skill-forge/`.
+
 A layer on top of writing a skill. You don't just write the file: you ensure it knows
 **what to delegate, to whom, and what to verify** — and that it ships with scope and QA
 by default.

@@ -1,0 +1,13 @@
+{
+  "name": "lovozeto-skills",
+  "owner": {
+    "name": "lovozeto"
+  },
+  "plugins": [
+    {
+      "name": "skill-forge",
+      "source": "./plugins/skill-forge",
+      "description": "Guided wizard to design and build agents, skills, and plugins with zero-hole definition, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, and an HTML approval view."
+    }
+  ]
+}

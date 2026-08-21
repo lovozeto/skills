@@ -1,0 +1,83 @@
+<!--
+  HTML approval view (template). The wizard fills the <!-- NODES --> region with the concrete
+  phases/nodes of the artifact, taken from the completed Definition Ledger, then shows this to
+  the user for approval BEFORE building. Self-contained, theme-aware, no external assets.
+  Replace <ARTIFACT_TITLE>, <ARTIFACT_SUBTITLE>, and the nodes/mandate chips.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><ARTIFACT_TITLE> — workflow</title>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f6f7f9; --card: #ffffff;
+    --text: #1a1a1a; --muted: #5c5f66; --border: #e3e5e9;
+    --accent-bg: #e6f1fb; --accent-fg: #0c447c;
+    --warn-bg: #fdf3e0; --warn-fg: #7a4e00;
+    --danger-bg: #fdecec; --danger-fg: #8a1f1f;
+    --ok-bg: #e7f5ec; --ok-fg: #1a5c34;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17181b; --surface: #1f2125; --card: #23262b;
+      --text: #f0f1f3; --muted: #a3a7b0; --border: #33363d;
+      --accent-bg: #12314f; --accent-fg: #bcd8f5;
+      --warn-bg: #3d2f14; --warn-fg: #f0d19a;
+      --danger-bg: #401f1f; --danger-fg: #f2b8b8;
+      --ok-bg: #17361f; --ok-fg: #a9dcbb;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17181b; --surface: #1f2125; --card: #23262b;
+    --text: #f0f1f3; --muted: #a3a7b0; --border: #33363d;
+    --accent-bg: #12314f; --accent-fg: #bcd8f5;
+    --warn-bg: #3d2f14; --warn-fg: #f0d19a;
+    --danger-bg: #401f1f; --danger-fg: #f2b8b8;
+    --ok-bg: #17361f; --ok-fg: #a9dcbb;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .flow { display: flex; flex-direction: column; gap: 6px; max-width: 720px; }
+  .node { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 14px; font-size: 14px; }
+  .node .t { font-weight: 500; }
+  .node .d { color: var(--muted); }
+  .arrow { text-align: center; color: var(--muted); }
+  .gate { background: var(--warn-bg); color: var(--warn-fg); border-color: transparent; }
+  .block { border: 1.5px dashed var(--danger-fg); color: var(--danger-fg); background: transparent;
+    text-align: center; }
+  .done { background: var(--ok-bg); color: var(--ok-fg); border-color: transparent; font-weight: 500;
+    text-align: center; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip { background: var(--accent-bg); color: var(--accent-fg); border-radius: 20px;
+    padding: 4px 12px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1><ARTIFACT_TITLE></h1>
+  <p class="sub"><ARTIFACT_SUBTITLE></p>
+
+  <div class="flow">
+    <!-- NODES: one .node per phase/agent; .arrow between; .gate for gates; .block for blocking checks; .done for the final result. Example: -->
+    <div class="node"><span class="t">Phase 0 ·</span> <span class="d">objective + expected output</span></div>
+    <div class="arrow">↓</div>
+    <div class="node block">🚦 gate · &lt;blocking check&gt;</div>
+    <div class="arrow">↓</div>
+    <div class="node done">✅ &lt;final artifact&gt;</div>
+  </div>
+
+  <div class="chips">
+    <!-- MANDATES: the guarantees this artifact honors -->
+    <span class="chip">one agent = one task</span>
+    <span class="chip">master orchestrator</span>
+    <span class="chip">guardrail hooks</span>
+    <span class="chip">mandatory model + equivalence</span>
+  </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "description": "<PLUGIN_NAME> guardrails. SessionStart preflights universal dependencies and blocks use if any are missing or the user declines. Add PreToolUse/Stop guardrails as the artifact's risk requires.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/preflight-deps.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "<TOOL_MATCHER e.g. Bash|Write|Edit>",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/preflight-deps.py\" --gate",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
