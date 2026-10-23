@@ -32,22 +32,32 @@ Writes end-of-session state so the next session starts oriented, and keeps the r
    `git status --short`, `git log --oneline -5`, and
    `gh pr list --json number,title,state,headRefName --limit 10` (skip if `gh` is missing).
 2. Draft `QUICK-STATE.md`: at most 25 lines, sections **What I did · What is next ·
-   Blockers · Branch · Open PRs**. Leave out credentials, company names, and anything already
-   in `CLAUDE.md`. Done when all five sections are present and the draft is ≤ 25 lines.
+   Blockers · Branch · Open PRs**. NEVER write credentials, company names, castandcrew IP, or
+   anything already in `CLAUDE.md`: `QUICK-STATE.md` is plain text that is often committed.
+   Done when all five sections are present and the draft is ≤ 25 lines.
 3. Find the previous close. This assumes `QUICK-STATE.md` is committed with each session's
    work: `base` = `git log -1 --format=%H -- QUICK-STATE.md`. If the file was never committed
    or is gitignored, `base` = `none`, with that reason.
 4. If `<repo>/CLAUDE.md` exists, spawn a general-purpose subagent with the Agent tool,
-   `model: sonnet`. Brief: "Read and follow `<absolute path of this skill's folder>/subagents/doc-pruner.md`.
-   repo=`<repo>`. base=`<sha or none: reason>`. session_rules=`<project rules this session
-   established, one per line, or none>`." If there is no `CLAUDE.md`, recommend the user run
-   `/init-project` and continue.
+   `model: sonnet` (judgment work; equivalence: the strongest mid tier, under Codex
+   `gpt-6.1-sol`; never a free delegated model, since a repo's `CLAUDE.md` may be private).
+   Brief: "Read and follow `<absolute path of this skill's folder>/subagents/doc-pruner.md`.
+   Read-only: do not use Write or Edit. repo=`<repo>`. base=`<sha or none: reason>`.
+   session_rules=`<project rules this session established, one per line, or none>`." If there
+   is no `CLAUDE.md`, recommend the user run `/init-project` and continue. Done when doc-pruner
+   returned `PROPOSED`, `NO CHANGES`, `NO CLAUDE.md`, or `OUT OF SCOPE`, or `/init-project` was
+   recommended.
 5. Ask for two approvals: the `QUICK-STATE.md` draft, and doc-pruner's change list (when it
-   returned `PROPOSED`). If the user approves only some changes, apply just those to the
-   current `CLAUDE.md` and ignore `proposed_file`.
-6. Write what was approved: `<repo>/QUICK-STATE.md` (overwrite), `~/GitHub/QUICK-STATE.md`
-   (overwrite) when cwd is a project repo, and the approved `CLAUDE.md` changes.
-7. Show the user what was written. Done when every approved file is written and shown.
+   returned `PROPOSED`), showing each `move` with its target file and the text to append. If
+   the user approves only some changes, apply just those to the current `CLAUDE.md` and
+   ignore `proposed_file`. Done when each draft is approved, partly approved, or declined.
+6. Write what was approved: `<repo>/QUICK-STATE.md` (overwrite); `~/GitHub/QUICK-STATE.md`
+   (overwrite with the same approved draft) when `<repo>` is not `~/GitHub`; the approved
+   `CLAUDE.md` changes; and, for each approved `move`, append the line to its target file
+   (create it if missing).
+7. Show the user what was written, and remind them to commit `QUICK-STATE.md` with this
+   session's work: the next doc-pruner diff starts from that commit. Done when every approved
+   file is written and shown.
 
 ## Subcommand: pr
 
@@ -60,7 +70,7 @@ Appends one row per new PR to the running log.
    date = `updatedAt` as YYYY-MM-DD and repo = `gh repo view --json name -q .name`.
    Done when every row has 6 pipe-delimited columns.
 4. Show the drafted rows and wait for an OK.
-5. Append the approved rows to `~/GitHub/PR-LOG.md` (append only; history stays as written).
+5. Append the approved rows to `~/GitHub/PR-LOG.md`; never overwrite or rewrite existing rows.
    Done when the approved rows are appended.
 
 ## Subcommand: reconcile
@@ -83,4 +93,5 @@ Cadence: on demand; monthly is a good rhythm.
 
 ## One-task rule (inherited by all subcommands)
 
-Each subcommand has one task. Return the result or `SCOPE_REJECTED`; stay inside that scope.
+Each subcommand has one task. Return the result or `SCOPE_REJECTED`. Never expand scope on
+your own initiative.

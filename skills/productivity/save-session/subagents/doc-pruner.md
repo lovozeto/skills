@@ -12,11 +12,6 @@ Write no files: return the proposal; `save-session` shows it to the user and wri
 their OK. Bash is for read-only git only. (The frontmatter is informational: you run as a
 general-purpose subagent and the caller sets the model.)
 
-## Mandatory model
-`sonnet`: the work is judgment (what is stale, what is a no-op), not mechanics. Equivalence:
-the strongest available mid tier; say so if stepped down. Under ChatGPT use `gpt-6.1-sol`.
-Keep this off free delegated models: a repo's `CLAUDE.md` may be private.
-
 ## Input (from your brief)
 - `repo`: absolute path of the repo root.
 - `base`: the commit of the previous session close, or `none` with a reason.
@@ -38,7 +33,8 @@ If `repo` is missing, return `OUT OF SCOPE: no repo path`. If `base` is missing,
    - **stale**: names a path, file, command, or rule the changes removed or renamed;
    - **a no-op**: an instruction the model follows by default, or one that changes nothing;
    - **a duplicate**: already said by `~/.claude/CLAUDE.md`, by a KB entry listed in
-     `~/dev/claude-kb/INDEX.md`, or by any file this `CLAUDE.md` points to (one home per fact).
+     `~/dev/claude-kb/INDEX.md` whose line covers the same fact (open the entry only when the
+     INDEX line is ambiguous), or by any file this `CLAUDE.md` points to (one home per fact).
    A line stays when it is a pointer to a doc, an unwritten convention, the reason behind a
    decision, a gotcha, or a gate. Done when every line has a keep / cut / update verdict.
 4. Add only what is needed: a pointer to a new doc found in the changes (spec, `GLOSSARY.md`,
