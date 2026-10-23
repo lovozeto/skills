@@ -34,7 +34,8 @@ before promoting any entry above `advisory`.
 
 ### Gate 1 — Pre-flight (no writes yet)
 - Confirm which sources to refresh (arg or ask). Confirm the user permits web fetches now.
-- List exactly which KB files and templates may change. Get the user's OK to proceed.
+- List exactly which KB files and templates may change (and the optional global-index pointer,
+  if the user wants it). Get the user's OK to proceed.
 
 ### Gate 2 — Curation (one single-task curator per source)
 For each source, spawn the `source-curator` subagent with that **one** source. It fetches,
@@ -42,17 +43,20 @@ extracts findings, and returns them with **provenance** (source + URL + date) an
 `tier`. It never writes to the KB and never populates from memory. If a source is unreachable,
 it returns `UNREACHABLE` and the entry stays `advisory (unverified)`.
 
-### Gate 3 — Review (consolidate, tier, write)
-- Consolidate findings; resolve conflicts across sources; drop anything without provenance.
-- Mark each entry `advisory` or `proven` (`proven` only when verified on this machine).
-- Update `../../kb/*` and the `Last updated` column in `../../kb/INDEX.md`.
-- For every file you refreshed, set its frontmatter `last_verified` to today and `review_by`
-  from the volatility table in `../../kb/sources.md`. A file you could not verify keeps
-  `last_verified` unchanged; never move `review_by` forward without checking its sources.
-- When best practices changed a template's shape, spawn `template-updater` to update the
-  affected file(s) in `../../assets/templates/`.
-- Register/refresh a pointer in the user's global `~/dev/claude-kb/INDEX.md` for discovery.
-- Show a diff summary and get explicit confirmation before finalizing.
+### Gate 3 — Review (consolidate, tier, confirm, write)
+1. Consolidate findings; resolve conflicts across sources; drop anything without provenance.
+2. Mark each entry `advisory` or `proven` (`proven` only when verified on this machine).
+3. Show the **proposed** diff summary: every KB file, frontmatter date, and template that would
+   change. Get explicit confirmation. Nothing is written before this OK.
+4. Write the confirmed changes to `../../kb/*` and the `Last updated` column in
+   `../../kb/INDEX.md`.
+5. For every file you refreshed, set its frontmatter `last_verified` to today and `review_by`
+   from the volatility table in `../../kb/sources.md`. A file you could not verify keeps
+   `last_verified` unchanged; never move `review_by` forward without checking its sources.
+6. When a confirmed change alters a template's shape, spawn `template-updater` to update the
+   affected file(s) in `../../assets/templates/`.
+7. Optional, only if listed in Gate 1: if the user keeps a global KB index outside this plugin,
+   propose the pointer line and write it only on their OK.
 
 ## Subagents (one task each)
 | Subagent | Single task |

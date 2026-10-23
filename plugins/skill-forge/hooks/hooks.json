@@ -1,5 +1,5 @@
 {
-  "description": "skill-forge guardrails. SessionStart injects the operating rules (zero-hole ledger, orchestrator+single-task, hooks-always, HTML approval gate). This is a sensor: it emits context and never returns a permission decision.",
+  "description": "skill-forge guardrails. SessionStart emits one pointer line to the forge-wizard skill. This is a sensor: it emits context and never returns a permission decision.",
   "hooks": {
     "SessionStart": [
       {

@@ -200,7 +200,8 @@ for a fix. Confirm the branch name with the user. Then build the artifact from t
 Any script the artifact ships (preflight, helpers) is written test-first with `tdd`.
 
 **Phase 5b — Prompt review.** Spawn `agents/agent-prompt-reviewer` (opus) on every drafted
-`SKILL.md`, agent, and command. Apply its `high` findings; show the user the rest. Re-run it
+`SKILL.md`, agent, and command. Its brief must give the **absolute** path of this plugin's
+`kb/` folder and of each file to review. Apply its `high` findings; show the user the rest. Re-run it
 until its verdict is `SHIP` or the user accepts the remaining findings. If it reports
 `KB EXPIRED`, tell the user.
 
