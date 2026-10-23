@@ -129,6 +129,7 @@ def main():
     })
     date_hint_candidates = []
     videos_to_probe = []
+    videos_total = 0
 
     for rec in records:
         source = rec.get("SourceFile") or rec.get("FileName") or "?"
@@ -193,6 +194,7 @@ def main():
             flag("legacy_container", "%s (.%s)" % (name, ext))
 
         if mime.startswith("video/"):
+            videos_total += 1
             codec = rec.get("VideoCodec") or rec.get("CompressorID") or None
             if len(videos_to_probe) < 200:
                 videos_to_probe.append({
@@ -215,6 +217,7 @@ def main():
         "date_hint_candidates_total": len(date_hint_candidates),
         # Containers alone do not decide video compatibility; Claude probes these.
         "videos_to_probe": videos_to_probe,
+        "videos_to_probe_total": videos_total,
     }
 
     for folder, data in sorted(folders.items()):

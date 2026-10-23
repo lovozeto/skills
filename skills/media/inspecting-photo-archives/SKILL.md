@@ -25,9 +25,11 @@ Copy this checklist and tick it as you go:
 ```
 
 **Output folder.** `OUT` = `$HOME/Documents/photo-archive-reports/<scope>/<YYYY-MM-DD>`, where
-`<scope>` is the folder or CD name. Always expand it to an absolute path; `~` inside quotes is
-not expanded. Dated folders are a deliberate exception to the house "no dated folders" rule:
-these reports live outside any repo, so the dates are their only history.
+`<scope>` is the folder or CD name (outside any repo, so the date is the history). Shell
+variables do not persist between commands: in every command below, write the expanded
+absolute path where `$OUT` appears, or start the command with `OUT="<absolute path>";`.
+
+Scripts live in `${CLAUDE_SKILL_DIR}/scripts/`; outside Claude Code, that is this file's folder.
 
 ## Step 0 — Dependency preflight
 
@@ -89,14 +91,23 @@ examples:
 | `legacy_container` | `.avi`, `.wmv`, `.mpg`, `.bmp`… — a candidate to look at, **not** to convert yet |
 
 Done when `summary.json` is read and every flag count is noted per folder. If
-`date_hint_candidates_total` is larger than the list, say so and pull the rest from
-`raw-scan.json` with `jq`.
+`date_hint_candidates_total` is larger than the list, say so and pull every candidate (no
+date or an impossible year) from the raw scan:
+
+```bash
+jq '[.[] | ((.DateTimeOriginal // .CreateDate // "") | tostring) as $d
+     | ($d[0:4] | tonumber? // 0) as $y
+     | select($y < 1990 or $y > (now | strftime("%Y") | tonumber))
+     | {file: .FileName, folder: (.Directory | split("/") | last)}]' "$OUT/raw-scan.json"
+```
 
 ## Step 3 — Judge at-risk formats
 
 Read `reference/format-risk.md` before classifying anything. Then run `ffprobe` (exact command
 there) on every entry in `videos_to_probe`, and classify each high / medium / low with the
-concrete reason. Done when every entry has a classification or is marked unverified.
+concrete reason. If `videos_to_probe_total` is larger than the list (capped at 200), say so in
+the report with the number left unprobed. Done when every listed entry has a classification
+or is marked unverified.
 
 ## Step 4 — Infer dates from names
 
@@ -113,7 +124,9 @@ candidate has a hint or `null`, and the QA checks passed.
 
 ## Step 5 — Ask for estimated dates
 
-Where there is no trustworthy EXIF date (missing or `impossible_date`) and no usable hint, ask
+Where there is no trustworthy EXIF date (missing or `impossible_date`) and no file in the
+folder got a non-null `date_hint_iso` (any confidence counts; low ones are flagged in the
+report), ask
 the user **per folder** (not per file) for an estimated date, showing the context you already
 have: folder name, photo count, cameras found, the year range of neighbouring folders. Offer
 "I don't know" as a valid answer — a folder without a date is a legitimate result. Done when
@@ -123,7 +136,10 @@ every such folder has an answer.
 
 Write in `$OUT/`:
 
-- **`report.json`** — structured, English keys, for another step or skill to consume.
+- **`report.json`** — structured, English keys, for another step or skill to consume. One
+  object per folder: `folder`, `count`, `date_range`, `date_source` (`exif` | `inferred` |
+  `user` | `unknown`), `cameras`, `flags`, `at_risk_formats` (list of `file`, `codec`,
+  `problem`, `recommendation`), `suggested_action`.
 - **`report.md`** — readable, in the user's language, for deciding. Per folder: what is there,
   date range, cameras, what is wrong, formats to look at, and the **suggested action** (not
   executed).

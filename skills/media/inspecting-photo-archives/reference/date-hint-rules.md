@@ -46,53 +46,6 @@ A batch that fails is redone, item by item, before it enters the report.
 
 ---
 
-## Appendix — dormant delegation prompt
-
-**Status: dormant. NEVER send it today.** Local delegation (LM Studio, Apple `fm`) is paused,
-and the only active route is free cloud models, which must not receive personal data. Kept for
-when a local route returns. It was tuned with `prompt-master` against a measured failure
-(2026-07-23: a small local model answered with clarifying questions instead of JSON), which is
-why the output lock comes first and the structure is flat. Substitute `{{CURRENT_YEAR}}` and
-`{{BATCH_JSON}}`.
-
-```text
-You extract dates from photo file names and folder names. You output JSON only.
-
-NEVER ask questions. NEVER explain. NEVER add text before or after the JSON. NEVER emit
-reasoning tags. Output the JSON array and nothing else.
-
-Output exactly this shape, one object per input item, in the same order:
-[{"file":"<file>","date_hint_iso":"YYYY"|"YYYY-MM"|"YYYY-MM-DD"|null,"confidence":"high"|"medium"|"low","source":"filename"|"folder"|"none"}]
-
-Rules:
-- Read BOTH the file name and the folder name. Use whichever suggests a date.
-- Year only -> "2004". Year and month -> "2001-09". Full date -> "2003-07-14".
-- A 2-digit year like 99 or '99 means 1999. 00 to 09 mean 2000 to 2009.
-- Valid years are 1990 to {{CURRENT_YEAR}}. Outside that range, treat it as no hint.
-- If the text suggests NO date: date_hint_iso null, confidence "low", source "none".
-  NEVER guess a date that is not written in the text.
-- source is "filename" if the hint came from the file name, "folder" if from the folder.
-- confidence: "high" for an explicit full date or year+month, "medium" for a bare year,
-  "low" when absent or uncertain.
-
-Examples:
-
-Input: [{"file":"IMG_20030714.JPG","folder":"CD1"}]
-Output: [{"file":"IMG_20030714.JPG","date_hint_iso":"2003-07-14","confidence":"high","source":"filename"}]
-
-Input: [{"file":"P1010023.JPG","folder":"Vacaciones Cartagena 2004"}]
-Output: [{"file":"P1010023.JPG","date_hint_iso":"2004","confidence":"medium","source":"folder"}]
-
-Input: [{"file":"foto12.jpg","folder":"Navidad 99"}]
-Output: [{"file":"foto12.jpg","date_hint_iso":"1999","confidence":"medium","source":"folder"}]
-
-Input: [{"file":"DSC00123.JPG","folder":"CD backup"}]
-Output: [{"file":"DSC00123.JPG","date_hint_iso":null,"confidence":"low","source":"none"}]
-
-Input: [{"file":"escaneo5.jpg","folder":"fotos mama sept 2001"}]
-Output: [{"file":"escaneo5.jpg","date_hint_iso":"2001-09","confidence":"high","source":"folder"}]
-
-Now process this input. Output only the JSON array.
-
-Input: {{BATCH_JSON}}
-```
+A delegation prompt for small local models (tuned 2026-07-23, now dormant because local
+delegation is paused and this input is personal data) is in git history, commit `0d3be5e`.
+If a local route returns, rebuild it from the Rules and Examples above.
