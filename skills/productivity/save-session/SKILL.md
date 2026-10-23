@@ -1,8 +1,7 @@
 ---
 name: save-session
-description: "Keep session state and Claude Code memory current. Use when the user wants to close a session with a state update, log a PR, or reconcile stale memory."
+description: "Keep session state and Claude Code memory current. Use when closing a session (QUICK-STATE.md must be updated before ending), when the user wants to log a PR, or to reconcile stale memory."
 argument-hint: "close | pr | reconcile"
-disable-model-invocation: true
 ---
 
 # memory-keeper

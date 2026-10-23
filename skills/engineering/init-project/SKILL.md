@@ -1,7 +1,6 @@
 ---
 name: init-project
-description: Initialize the current repo to work with Claude. Creates ai-deps.yml, project CLAUDE.md, QUICK-STATE.md, and optional KB scaffolding. Manual only.
-disable-model-invocation: true
+description: Initialize the current repo to work with Claude. Creates ai-deps.yml, project CLAUDE.md, QUICK-STATE.md, and optional KB scaffolding. Use when a repo has no CLAUDE.md or QUICK-STATE.md yet, or the user asks to set up a project for AI-assisted work.
 allowed-tools: Read, Write, Bash(cat), Bash(ls), Bash(which), Bash(preflight*)
 ---
 

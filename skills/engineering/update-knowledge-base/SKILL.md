@@ -1,7 +1,6 @@
 ---
 name: update-knowledge-base
 description: "Add or correct a single KB entry from a known source, without running the full pipeline. Use when you know a rule is wrong, outdated, or missing — and you have the source URL."
-disable-model-invocation: true
 argument-hint: "[topic] [--url <source-url>]"
 allowed-tools: Read, Write
 ---
