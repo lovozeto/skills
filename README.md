@@ -2,6 +2,10 @@
 
 A collection of Claude Code skills for AI-assisted design and engineering workflows.
 
+> This repo is **public and distributable**: skills, the `skill-forge` plugin, and its
+> marketplace. Personal setup (profiles, machines, knowledge base, hooks, deploy script)
+> lives in a separate **private** repo, `lovozeto/lobomorir-ai-setup`, which installs this one.
+
 ## Install
 
 ```bash
