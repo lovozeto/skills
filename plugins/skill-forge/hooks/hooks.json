@@ -1,5 +1,5 @@
 {
-  "description": "skill-forge guardrails. SessionStart injects the operating rules (zero-hole ledger, orchestrator+single-task, hooks-always, HTML approval gate). This is a sensor: it emits context and never returns a permission decision.",
+  "description": "skill-forge guardrails. SessionStart stays silent unless a kb/ file has expired, then asks for /refresh-forge-kb. This is a sensor: it emits context and never returns a permission decision.",
   "hooks": {
     "SessionStart": [
       {

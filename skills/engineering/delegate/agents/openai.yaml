@@ -1,5 +1,3 @@
 interface:
   display_name: "Delegate"
   short_description: "Hand a token-heavy, low-reasoning task to a free opencode model"
-policy:
-  allow_implicit_invocation: false

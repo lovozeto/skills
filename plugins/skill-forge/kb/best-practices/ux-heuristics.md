@@ -1,3 +1,9 @@
+---
+tier: advisory
+last_verified: unknown
+review_by: 2026-10-22
+---
+
 # Best practices — UX heuristics (for wizard & artifact design)
 
 `tier: advisory` · seed (unverified). Refresh via `/refresh-forge-kb` (source: Nielsen Norman

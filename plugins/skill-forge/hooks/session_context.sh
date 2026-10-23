@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# skill-forge SessionStart guardrail (sensor only — emits context, no permission decision).
-# Reminds the operating rules whenever a session starts with this plugin installed.
-set -euo pipefail
+# skill-forge SessionStart sensor (emits context only, never a permission decision).
+# Silent unless a kb/ file has expired: forge-wizard is model-invoked, so its description
+# already tells the agent when to use it. This hook only adds what the description cannot:
+# that the KB the wizard relies on needs a refresh.
+set -uo pipefail
 
-read -r -d '' CONTEXT <<'EOF' || true
-skill-forge is installed. When creating, fixing, or reviewing an agent/skill/plugin, follow the forge-wizard flow:
-- Zero-hole definition: maintain a Definition Ledger; do NOT fill fields from memory; suggest, never assume; block generation while any field is PENDING.
-- Architecture: every generated skill has a master orchestrator + single-task specialized subagents (one task per agent).
-- Hooks always: every generated artifact ships guardrail hooks scaled to its complexity.
-- KB + maintainer: any knowledge-bearing artifact ships its own KB (provenance + tier) plus single-task maintainer agents.
-- Mandatory model: every agent/orchestrator declares its model(s), with an equivalence fallback when the recommended one is unavailable.
-- HTML approval view: render an HTML workflow view and get user approval BEFORE building.
-- Internal files in English; reply to the user in their language.
-Source of truth for best practices and models: the plugin's kb/ (pointer, never copy).
-EOF
+KB="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}/kb"
+TODAY="$(date +%F)"
+expired=()
+while IFS= read -r f; do
+  rb="$(grep -m1 '^review_by:' "$f" 2>/dev/null | awk '{print $2}' | tr -d '"')"
+  [[ -n "$rb" && ! "$rb" > "$TODAY" ]] && expired+=("${f#"$KB"/}")
+done < <(find "$KB" -name '*.md' 2>/dev/null)
 
-# Emit as additionalContext via hook JSON output.
+((${#expired[@]})) || exit 0
+
+CONTEXT="skill-forge KB expired (${expired[*]}): forge-wizard's prompting rules are unverified until the user types /refresh-forge-kb."
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":%s}}\n' \
   "$(printf '%s' "$CONTEXT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')"

@@ -1,3 +1,9 @@
+---
+tier: advisory
+last_verified: unknown
+review_by: 2026-10-22
+---
+
 # Model catalog (Claude-first, cloud only)
 
 Source of truth for the **mandatory model** field. **Claude is the base**: every

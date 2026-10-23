@@ -1,5 +1,3 @@
 interface:
   display_name: "Update Knowledge Base"
   short_description: "Add or correct a single KB entry from a verified source URL"
-policy:
-  allow_implicit_invocation: false

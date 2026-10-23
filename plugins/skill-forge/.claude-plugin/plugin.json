@@ -1,6 +1,6 @@
 {
   "name": "skill-forge",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Guided wizard to design and build agents, skills, and plugins with zero-hole definition, mandatory orchestrator + single-task subagent architecture, guardrail hooks, a live best-practices knowledge base, and an HTML approval view. Use when creating, fixing, or reviewing any Claude Code agent, skill, or plugin.",
   "author": {
     "name": "lovozeto"

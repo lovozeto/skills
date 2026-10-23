@@ -1,0 +1,3 @@
+interface:
+  display_name: "Inspecting Photo Archives"
+  short_description: "Read-only metadata report for old photo and video folders before importing them"

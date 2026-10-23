@@ -85,7 +85,7 @@ Invoke one Agent with all the `.raw/` intermediates for this base.
 Present the diff of the merged file against the previous version (if any).
 Flag every `⚠️ unresolved conflict` the merge left — do not let them pass unnoticed.
 
-**STOP.** No commit without approval. When conflicts need arbitration, suggest `/arbitrate`.
+**STOP.** No commit without approval. When conflicts need arbitration, tell the user to run `/arbitrate` (user-invoked).
 
 ---
 

@@ -1,3 +1,9 @@
+---
+tier: advisory
+last_verified: unknown
+review_by: 2026-10-22
+---
+
 # Best practices — agents (subagents)
 
 `tier: advisory` · seed (unverified). Refresh via `/refresh-forge-kb`.
