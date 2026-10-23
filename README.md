@@ -42,6 +42,7 @@ npx skills add lovozeto/skills -g -y
 | Skill | What it does |
 |---|---|
 | `/karaoke-builder` | Build/repair an UltraStar karaoke library — USDB / torrent (human-made) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
+| `/inspecting-photo-archives` | Read-only metadata report for old photo/video folders (capture date, camera, timezone, lost dates, at-risk formats) before importing |
 
 ## Plugins
 
@@ -79,5 +80,8 @@ These skills work well alongside the curated selection from
 [mattpocock/skills](https://github.com/mattpocock/skills):
 
 ```bash
-npx skills add mattpocock/skills -g -y
+claude plugin marketplace add mattpocock/skills
+claude plugin install mattpocock-skills@mattpocock
 ```
+
+Install it as a Claude Code plugin: `npx skills` does not link it into `~/.claude/skills`.
