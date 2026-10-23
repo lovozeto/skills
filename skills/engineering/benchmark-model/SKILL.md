@@ -1,6 +1,6 @@
 ---
 name: benchmark-model
-description: "Test a local model on representative tasks, measure quality and speed, and update the task-map in offload-to-local with findings. Run after adding a new model or after a model update."
+description: "Test a local model on representative tasks, measure quality and speed, and update the task-map in delegate with findings. Run after adding a new model or after a model update."
 disable-model-invocation: true
 argument-hint: "<model-id> [--tasks \"classify|summarize|extract|translate|code\"]"
 allowed-tools: Bash(ask-local *), Bash(ask-apple *), Bash(lms *), Read, Write
@@ -9,7 +9,7 @@ allowed-tools: Bash(ask-local *), Bash(ask-apple *), Bash(lms *), Read, Write
 # benchmark-model — measure a local model and update the routing map
 
 Run after adding a new model to LM Studio or after a model update. Results feed
-`references/task-map.md` in the `offload-to-local` skill.
+`references/task-map.md` in the `delegate` skill.
 
 Model to test: **$ARGUMENTS**
 
@@ -66,8 +66,8 @@ Present a results table:
 
 ### 5. Update `task-map.md`
 
-Read `references/task-map.md` in the `offload-to-local` skill
-(default path: `~/.agents/skills/lovozeto__skills/skills/engineering/offload-to-local/references/task-map.md`
+Read `references/task-map.md` in the `delegate` skill
+(default path: `~/.agents/skills/lovozeto__skills/skills/engineering/delegate/references/task-map.md`
 or wherever skills are installed).
 
 Update the local models table with the new row. If the model already exists, update its row.

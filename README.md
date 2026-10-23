@@ -20,7 +20,7 @@ npx skills add lovozeto/skills -g -y
 
 | Skill | What it does |
 |---|---|
-| `/offload-to-local` | Route token-heavy, low-reasoning tasks to a free local model |
+| `/delegate` | Hand token-heavy, low-reasoning tasks to a free opencode model |
 | `/ask-knowledge-base` | Explain a knowledge base rule in plain language |
 | `/write-for-model` | Build an optimized prompt for a specific local or delegation model |
 | `/commit` | Stage and commit following Conventional Commits |
@@ -65,12 +65,12 @@ Some skills require additional setup provided by
 
 | Dependency | Used by |
 |---|---|
-| `ask-apple`, `ask-local` wrappers on PATH | `offload-to-local`, `write-for-model` |
-| `hardware.md` in active profile | `offload-to-local`, `skill-forge` |
+| `ask-opencode` wrapper on PATH | `delegate`, `write-for-model` |
+| `hardware.md` in active profile | `delegate`, `skill-forge` |
 | Knowledge base at `~/dev/claude-kb/` | `ask-knowledge-base`, `kb-pipeline` |
 | `preflight` on PATH | `init-project` |
 
-Without that setup, skills fall back gracefully — `offload-to-local` uses the Claude
+Without that setup, skills fall back gracefully — `delegate` uses the Claude
 tier ladder, and `ask-knowledge-base` accepts a custom KB path at invocation time.
 
 ## Complementary: mattpocock/skills

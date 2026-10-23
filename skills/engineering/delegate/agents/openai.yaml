@@ -1,5 +1,5 @@
 interface:
-  display_name: "Offload to Local"
-  short_description: "Route a task to the cheapest local model that clears the quality bar"
+  display_name: "Delegate"
+  short_description: "Hand a token-heavy, low-reasoning task to a free opencode model"
 policy:
   allow_implicit_invocation: false

@@ -4,7 +4,7 @@ Source of truth for the **mandatory model** field. **Claude is the base**: every
 recommendation is expressed as a Claude tier first. The other providers are here so that an
 artifact carries **coherent instructions across stacks** — if the person running it uses
 ChatGPT or OpenCode instead of Claude, the mandatory-model field maps to a sensible
-equivalent. **No local models** (that concern lives separately in `offload-to-local`).
+equivalent. **No local models** (that concern lives separately in `delegate`).
 
 Goal: **optimize tokens while holding quality**. Pick the cheapest capable model per role.
 

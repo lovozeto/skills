@@ -1,66 +1,62 @@
 # Task → Model Map
 
-Reference for `offload-to-local`. Update this file when you run `/benchmark-model`
-and discover a better model for a task class.
+Reference for `delegate`. Scope for now: **opencode free models only**, run through
+`ask-opencode`. Update this file when a model is added, removed, or fails a task class twice.
 
 ## Tier ladder (quality → savings)
 
 ```
-local (ask-apple / ask-local) → claude-haiku → claude-sonnet → claude-opus
+opencode free (ask-opencode) → claude-haiku → claude-sonnet → claude-opus
 ```
 
 Always choose the cheapest tier that clears the quality bar. Never downgrade quality to save.
 
-## Wrapper selection
+## Models
 
-| Wrapper | When to use |
+Source of truth for the IDs: the header of the `ask-opencode` wrapper
+(`lobomorir-claude/shared/.claude/scripts/ask-opencode`). Per-model system prompts live
+next to it in `opencode-prompts/`.
+
+| Model ID | Best for |
 |---|---|
-| `ask-apple` | Short, structured tasks (~2s). Text light, single-pass. |
-| `ask-local` | Medium/long context, code, conversions, multi-constraint. Auto-manages LM Studio. |
-
-**Group subtasks by model** — switching models costs ~12s swap (one model at a time policy).
-**Batch size: ~40 items** — longer degrades format adherence; shorter wastes coordination overhead.
+| `opencode/north-mini-code-free` | Fast mechanical tasks — default |
+| `opencode/laguna-s-2.1-free` | Multi-step coding, terminal agent, 1M context |
+| `opencode/nemotron-3-ultra-free` | Reasoning-light analysis, complex debugging (Claude still decides) |
+| `opencode/mimo-v2.5-free` | Tasks with screenshots, UI, or diagrams |
 
 ## Task classification
 
-| Task class | Delegable to local | Notes |
-|---|---|---|
-| Summarize long text/log | ✅ Yes | ask-apple for short, ask-local for long |
-| Extract structured fields | ✅ Yes | Verify form + spot-check content |
-| Translate prose | ✅ Yes | ask-apple |
-| Rewrite / clean text | ✅ Yes | |
-| Convert format (JSON, CSV, Markdown) | ✅ Yes | |
-| Boilerplate / mechanical code refactor | ✅ Yes | ask-local with coder model |
-| Read/summarize long code | ✅ Yes | ask-local |
-| Classify by text form | ✅ Yes | e.g. "does this contain a date?" |
-| Classify by world knowledge | ❌ No | Local models hallucinate confidently |
-| Translate SKILL.md / agent / command | ⚠️ High risk | See portability notes below |
-| Reasoning / architecture / decisions | ❌ No | Keep on Claude |
-| Critical code | ❌ No | |
-| QA / verification | ❌ No | |
-| Web search / current events | ❌ No | Local models have no internet |
+| Task class | Delegable | Model | Notes |
+|---|---|---|---|
+| Summarize long text/log | ✅ Yes | north-mini-code | laguna for very long input |
+| Extract structured fields | ✅ Yes | north-mini-code | Verify form + spot-check content |
+| Translate prose | ✅ Yes | north-mini-code | |
+| Rewrite / clean text | ✅ Yes | north-mini-code | |
+| Convert format (JSON, CSV, Markdown) | ✅ Yes | north-mini-code | |
+| Rename / format / search across a repo | ✅ Yes | north-mini-code | `--dir <repo>`, review diff |
+| Boilerplate / mechanical code refactor | ✅ Yes | laguna-s-2.1 | `--dir <repo>`, review diff |
+| Read/summarize long code | ✅ Yes | laguna-s-2.1 | 1M context |
+| Describe a screenshot / UI / diagram | ✅ Yes | mimo-v2.5 | |
+| Classify by text form | ✅ Yes | north-mini-code | e.g. "does this contain a date?" |
+| Classify by world knowledge | ❌ No | — | Small models hallucinate confidently |
+| Translate SKILL.md / agent / command | ⚠️ High risk | laguna-s-2.1 | See protocol below |
+| Architecture / decisions / critical code | ❌ No | — | Keep on Claude |
+| QA of a delegated result | ❌ No | — | Claude always owns QA |
+| Private code, credentials, personal data | ❌ No | — | opencode is cloud — data leaves the machine |
 
 ## Translating instruction files — read this before delegating
 
-Translating a README is safe. Translating a `SKILL.md`, agent, or command to English
-is **high risk**: a translated identifier, a softened `NEVER`, or an inverted negation
-silently breaks the system. Protocol:
-1. Prompt that preserves code blocks and identifiers verbatim
+Translating a README is safe. Translating a `SKILL.md`, agent, or command is **high risk**:
+a translated identifier, a softened `NEVER`, or an inverted negation silently breaks the
+system. Protocol:
+1. Prompt that preserves code blocks, paths, backticks, and identifiers verbatim
 2. 4-point QA per file: identifiers unchanged, NEVER/ALWAYS strength preserved,
    negations intact, no hallucinated content
 3. Two-strike rule: if a file class fails QA twice, stop delegating it
 
-## Local models available (update per machine)
+## Failure log
 
-This section is populated by `lobomorir-ai-setup` profile setup.
-If not configured, use the Claude tier ladder only.
+Record task classes that failed QA twice here (date, model, task class, what went wrong).
 
-| Wrapper | Model ID | Best for |
-|---|---|---|
-| ask-apple | Apple on-device FM | Short structured, fast (~2s) |
-| ask-local | google/gemma-4-e4b | Light tasks |
-| ask-local | qwen/qwen3.5-9b | General local |
-| ask-local | qwen/qwen3-coder-30b | Code tasks |
-| ask-local | microsoft/phi-4-reasoning-plus | Reasoning-light |
-
-Update this table after running `/benchmark-model`.
+| Date | Model | Task class | Failure |
+|---|---|---|---|
