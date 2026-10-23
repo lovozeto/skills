@@ -16,6 +16,10 @@ it and pasted the output). Seed entries are `advisory` and marked *unverified* u
 | Best practices — prompting | `best-practices/prompting.md` | advisory | seed (unverified) |
 | Best practices — UX heuristics | `best-practices/ux-heuristics.md` | advisory | seed (unverified) |
 
+## Expiry
+Each file's frontmatter carries `last_verified` and `review_by` (volatility table in
+`sources.md`). Seed files start as `last_verified: unknown` and are due for refresh.
+
 ## Maintenance
 Run `/refresh-forge-kb` to refresh entries from the sources in `sources.md`. It applies three
 gates (pre-flight, curation, review), records provenance + tier, and updates the

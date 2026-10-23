@@ -5,6 +5,26 @@ follow semver (patch = fix, minor = new capability, major = breaking).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-22
+### Added
+- **Companion skills from `mattpocock-skills`** (soft dependency, built-in fallback):
+  `grilling` drives the Ledger interview, `domain-modeling` the glossary/ADRs,
+  `codebase-design` where agents are cut, `writing-for-agents` how every file is written,
+  `wizard` the human-only setup steps, `tdd` shipped scripts, `code-review` the final
+  Standards + Spec review. `wayfinder` / `to-spec` / `to-tickets` are recommended for work
+  bigger than one session (Phase 0.5).
+- **Phase 3b — invocation choice + always-loaded budget**: every generated skill justifies
+  model- vs user-invoked; blanket "manual only" is treated as a hole.
+- **Phase 5b — `agent-prompt-reviewer`** (opus): reviews drafted files against the KB and
+  `writing-for-agents`; every finding cites rule + source; flags an expired KB.
+- **KB expiry**: every KB file carries `last_verified` + `review_by` (volatility table in
+  `kb/sources.md`); generated KBs get the same. Matt's `writing-for-agents` added as a source.
+### Changed
+- `forge-wizard` is now **model-invoked** (Claude reaches it when you ask to build or fix a
+  skill, agent, or plugin).
+- SessionStart hook trimmed to one pointer line (the rules live in the skill and `kb/`).
+- `refresh-forge-kb` sets `review_by` on every refreshed file and runs when a file expires.
+
 ## [0.2.0] — 2026-08-21
 ### Changed
 - Model catalog is now **Claude-first, cloud only**: Claude tiers are the base, with

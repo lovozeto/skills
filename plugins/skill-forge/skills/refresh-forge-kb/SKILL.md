@@ -22,6 +22,10 @@ before each refresh. On-demand; schedulable via `/schedule` (the user opts in).
 Orchestrator: `opus` (native). Equivalence: closest available reasoning tier from
 `../../kb/model-catalog.md`; Claude tier ladder as last resort, stated.
 
+## When to run
+When the user's session preflight lists a skill-forge KB file as expired, or when
+`forge-wizard` reports an expired KB before building. High-volatility files expire monthly.
+
 ## Sources
 Read `../../kb/sources.md`. Treat `(verify)` URLs as unconfirmed — confirm the real URL
 before promoting any entry above `advisory`.
@@ -42,6 +46,9 @@ it returns `UNREACHABLE` and the entry stays `advisory (unverified)`.
 - Consolidate findings; resolve conflicts across sources; drop anything without provenance.
 - Mark each entry `advisory` or `proven` (`proven` only when verified on this machine).
 - Update `../../kb/*` and the `Last updated` column in `../../kb/INDEX.md`.
+- For every file you refreshed, set its frontmatter `last_verified` to today and `review_by`
+  from the volatility table in `../../kb/sources.md`. A file you could not verify keeps
+  `last_verified` unchanged; never move `review_by` forward without checking its sources.
 - When best practices changed a template's shape, spawn `template-updater` to update the
   affected file(s) in `../../assets/templates/`.
 - Register/refresh a pointer in the user's global `~/dev/claude-kb/INDEX.md` for discovery.

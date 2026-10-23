@@ -18,6 +18,7 @@ A guided **wizard** for designing and building Claude Code **agents, skills, and
 | Path | Role |
 |---|---|
 | `skills/forge-wizard/` | The master wizard (orchestrator). Drives the whole flow. |
+| `skills/forge-wizard/agents/agent-prompt-reviewer.md` | Opus reviewer: judges every drafted file as a prompt, against the KB and `writing-for-agents`. |
 | `skills/refresh-forge-kb/` | On-demand + schedulable maintainer that refreshes the KB and the packaged templates from credible sources. |
 | `kb/` | Bundled, portable knowledge base (best practices + multi-provider model catalog), the wizard's source of truth. |
 | `assets/templates/` | Reusable scaffolds the wizard instantiates (ledger, plugin.json, hooks.json, preflight, setup, skill/agent, HTML flow view). |
@@ -32,6 +33,14 @@ This repository is a plugin marketplace (`/.claude-plugin/marketplace.json`). Ad
 ```
 
 Or install by path from a local clone. See the marketplace manifest at the repo root.
+
+## Companion plugin (recommended)
+
+Install `mattpocock-skills` (`claude plugin marketplace add mattpocock/skills` then
+`claude plugin install mattpocock-skills@mattpocock`). The wizard uses its `grilling`,
+`domain-modeling`, `codebase-design`, `writing-for-agents`, `wizard`, `tdd`, and `code-review`
+skills, and recommends `wayfinder` / `to-spec` / `to-tickets` for large work. Without it, the
+wizard runs its built-in flow and says which steps it skipped.
 
 ## Host dependencies
 

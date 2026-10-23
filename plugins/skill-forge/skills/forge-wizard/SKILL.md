@@ -1,7 +1,6 @@
 ---
 name: forge-wizard
-description: Guided wizard to design and build a Claude Code agent, skill, or plugin from scratch, or to fix/review an existing one. Zero-hole definition (no assumptions), complexity-based type decision, mandatory orchestrator + single-task subagents, guardrail hooks, KB + maintainer, mandatory model per agent, and an HTML approval view before building. Use whenever the user wants to create, improve, fix, or review a skill, agent, subagent, or plugin.
-disable-model-invocation: true
+description: Build, fix, or review a Claude Code skill, agent, subagent, or plugin through a gated wizard (zero-hole definition, orchestrator + single-task subagents, hooks, KB, model per agent, HTML approval). Use whenever the user wants to create, improve, fix, or review a skill, agent, or plugin.
 argument-hint: "what to build or fix"
 model: opus
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, WebFetch, WebSearch
@@ -36,6 +35,29 @@ work to **single-task subagents** and keep the decisions.
    and verified**, with the user's confirmation. **Version everything:** bump the artifact's
    `version` and add a `CHANGELOG.md` entry for every change you ship. See Phase 6.
 
+## Companion skills (mattpocock-skills) — soft dependency
+
+The wizard borrows proven disciplines from Matt Pocock's skills instead of reinventing them.
+At the start, check which ones the Skill tool lists (plugin `mattpocock-skills`):
+
+| Skill | Model-invoked? | Used in |
+|---|---|---|
+| `grilling` | yes → invoke it | Phase 1 (how questions are asked) |
+| `domain-modeling` | yes → invoke it | Phase 1b (glossary + ADRs) |
+| `codebase-design` | yes → invoke it | Phase 3 (where to cut agents) |
+| `writing-for-agents` | yes → invoke it | Phase 3b + Phase 5b (how every file is written) |
+| `wizard` | yes → invoke it | Phase 4 (steps only the human can do) |
+| `tdd` | yes → invoke it | Phase 5 (scripts the artifact ships) |
+| `code-review` | yes → invoke it | Phase 5c (Standards + Spec review) |
+| `wayfinder`, `to-spec`, `to-tickets` | **no** (user-invoked) | Phase 0.5 — you can only recommend them; the user types them |
+
+If the plugin is missing, run every phase with the built-in behaviour described below, and
+state in the closing summary which companion steps were skipped. Never block on it.
+
+**KB freshness gate.** Read `last_verified` / `review_by` in `../../kb/` files. If any has
+expired or is `unknown`, tell the user and offer `/refresh-forge-kb` before Phase 3b and 5b
+(they rest on the prompting rules). The user may proceed anyway; record that in the Ledger.
+
 ## Working directory
 
 Keep the Definition Ledger and any scratch in the session scratchpad (ephemeral). Only
@@ -55,14 +77,28 @@ Ask, and confirm in one sentence:
 
 Do not proceed until both objective and expected output are stated by the user.
 
+### Phase 0.5 — Does it fit one session?
+If the objective is a **system** (several artifacts, or more work than one session holds),
+do not forge it whole. Recommend the user first map it: `/wayfinder` for a large effort with
+open decisions, or `/to-spec` then `/to-tickets` when the design is already clear. These are
+user-invoked: name the command, explain why in one line, and wait. Then forge **one piece per
+run**, each piece's ticket as its Phase 0 objective.
+
 ### Phase 1 — Zero-hole definition (Definition Ledger)
 1. Copy `../../assets/templates/DEFINITION.ledger.md` into the scratchpad as the working
    Ledger. Read `references/ledger-protocol.md` for how it is filled and audited.
-2. Every required field is `DEFINED` or `PENDING`. For each `PENDING`, ask the user. You
-   may offer a suggestion, explicitly labeled **suggestion** — the user must confirm it
-   before it becomes `DEFINED`.
+2. Every required field is `DEFINED` or `PENDING`. Fill the `PENDING` fields by **grilling**
+   (invoke `grilling`): map the fields as a design tree, ask the whole frontier per round,
+   number each question and give your recommended answer, phrased so "yes" accepts it. Look
+   facts up yourself (files, tools); put only decisions to the user. A recommended answer is
+   a **suggestion** until the user confirms it.
 3. **Do not advance while any field is `PENDING`.** If the user cannot answer a field,
    record it as `PENDING (blocked: <reason>)` and keep it blocking — never invent a value.
+
+### Phase 1b — Vocabulary (only when the artifact has its own terms)
+If the artifact introduces domain terms, invoke `domain-modeling`: resolve each term into the
+target repo's `GLOSSARY.md`, and write an ADR only for a decision that is hard to reverse,
+surprising without context, and the result of a real trade-off. Create files lazily.
 
 ### Phase 2 — Type by complexity (recommend + confirm)
 Read `references/decision-rubric.md`. Classify the work and **recommend one type with
@@ -77,7 +113,9 @@ to gate with a hook ⇒ plugin** (hooks are a plugin feature).
 ### Phase 3 — Mandatory architecture + mandatory model
 Every generated skill uses `../../assets/templates/SKILL.orchestrator.tmpl.md`: a **master
 orchestrator** that dispatches to **single-task subagents**
-(`../../assets/templates/agent.single-task.tmpl.md`).
+(`../../assets/templates/agent.single-task.tmpl.md`). Decide where to cut with the
+`codebase-design` vocabulary: each subagent is a **deep module** (small interface, real work
+behind it); a cut that only passes data through is a seam to remove.
 
 For the orchestrator **and each subagent**, set the **mandatory model** field from
 `../../kb/model-catalog.md`:
@@ -94,6 +132,17 @@ The catalog is **Claude-first, cloud only (no local models)**:
 
 Read `references/model-availability.md` for the exact wording.
 
+### Phase 3b — Invocation choice + always-loaded budget
+Invoke `writing-for-agents` (and its `SKILL-MECHANICS.md`). For every skill and command the
+artifact ships, decide and record in the Ledger:
+- **Model-invoked** (keeps a model-facing `description`; costs context on every turn) when the
+  agent must reach it on its own, or another skill must call it.
+- **User-invoked** (`disable-model-invocation: true`; costs the human's memory) when it only
+  ever fires by hand, or has side effects that need a deliberate human trigger.
+State the reason in one line per file. A blanket "manual only" is a hole, not a choice.
+Count what the artifact adds to every session (descriptions, SessionStart hook output) and
+keep it to the minimum that triggers reliably: point to material, do not inline it.
+
 ### Phase 4 — Dependencies, hooks, and KB (mandates)
 Analyze the artifact's dependencies and wire the mandates:
 - **Own deps** (scripts/assets that must ship) → package them inside the plugin → this
@@ -104,13 +153,18 @@ Analyze the artifact's dependencies and wire the mandates:
   `PreToolUse` it detects what is missing, **explains and asks permission**, and if a dep is
   missing or the user declines, it **states the plugin cannot be used**. It never installs
   without an explicit OK.
+- **Steps only the human can do** (OAuth, credentials, dashboards, secrets): invoke `wizard`
+  to generate an interactive bash wizard that walks them through it, instead of prose in
+  `setup.md`.
 - **Guardrail hooks (always).** Beyond dependency preflight, wire hooks that stop what must
   not happen, scaled to complexity/risk: out-of-scope writes, confirmation before
   irreversible actions, precondition checks in `PreToolUse`, verification on `Stop`.
 - **KB + maintainer (only if knowledge-bearing).** If the artifact carries knowledge,
   generate its KB (provenance + tier) and single-task maintainer agent(s). A purely
   mechanical artifact (e.g. a text transform) needs no KB — justify "trivial for KB" in the
-  Ledger.
+  Ledger. Every generated KB file carries `last_verified` (real date or `unknown`) and
+  `review_by` set by volatility (high: +1 month, medium: +6, low: +12), so the user's
+  preflight can flag it when it expires.
 
 ### Approval gate — HTML view (mandatory, before building AND before ExitPlanMode)
 This gate is **not optional** and is easy to skip by accident — do not. With Phases 0–4
@@ -142,8 +196,17 @@ convention. Confirm the move with the user before doing it (it is an effective c
 ### Phase 5 — Branch, build, then verify
 **Before writing anything, create a new git branch** for the work (never build on `main`).
 Name it by the commit standard: `feat/<artifact-name>` for a new build, `fix/<artifact-name>`
-for a fix. Confirm the branch name with the user. Then build the artifact from the templates
-and verify. See `references/verification.md` for the full procedure and known traps. In short:
+for a fix. Confirm the branch name with the user. Then build the artifact from the templates.
+Any script the artifact ships (preflight, helpers) is written test-first with `tdd`.
+
+**Phase 5b — Prompt review.** Spawn `agents/agent-prompt-reviewer` (opus) on every drafted
+`SKILL.md`, agent, and command. Apply its `high` findings; show the user the rest. Re-run it
+until its verdict is `SHIP` or the user accepts the remaining findings. If it reports
+`KB EXPIRED`, tell the user.
+
+**Phase 5c — Verify.** See `references/verification.md` for the full procedure and known
+traps. Also invoke `code-review` on the work branch with two axes: **Standards** (the target
+repo's conventions) and **Spec** (the completed Ledger is the spec). In short:
 - **Level 0 (structural, free):** run the official `skill-creator` `quick_validate` on each
   `SKILL.md`, and a strict YAML parse on every agent/command/template frontmatter (any
   `description` containing `:` or `{}` must be quoted).
@@ -176,5 +239,6 @@ The finished artifact at its approved path, with:
   complete.
 
 Close by confirming in one sentence: type, models (orchestrator + workers), hooks wired,
-KB tier (if any), and **which verification level ran** — and if none ran, say so instead of
-assuming it works.
+KB tier (if any), the prompt reviewer's verdict, **which verification level ran**, and which
+companion skills were skipped — and if a check did not run, say so instead of assuming it
+works.
