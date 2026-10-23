@@ -22,10 +22,14 @@ Determine:
 - Binaries the project actually needs
 - Whether there is an authoritative spec document
 
+Done when stack, binaries, and spec each have an answer with its source file, or "none found".
+
 ## Step 2 — Propose (GATE)
 
-Present the `ai-deps.yml` you will write, with one line of reasoning per dependency.
-Flag explicitly what was inferred and where from.
+Present every file you will write: the `ai-deps.yml` content (one line of reasoning per
+dependency, and what was inferred from where), the `CLAUDE.md` draft, and ask whether to
+create `.claude/knowledge/INDEX.md` and `VERIFIED.md`. Mark any file that already exists; it
+is left as is unless the user says to overwrite it.
 
 **STOP.** Do not write anything without confirmation.
 
@@ -33,15 +37,19 @@ Flag explicitly what was inferred and where from.
 
 Write, in order:
 1. `ai-deps.yml` with the approved dependencies
-2. `CLAUDE.md` for the project (from the scaffold template)
+2. `CLAUDE.md` for the project (from the scaffold template, following its budget note): keep
+   only the pointers whose target exists or is created in this step, and delete the rest
+   (e.g. the Spec line when there is no spec). Without the template: English, ≤ 40 lines,
+   pointers and reasons only
 3. `QUICK-STATE.md` (empty — filled at end of each session by `/save-session`)
-4. `.claude/knowledge/INDEX.md` if the project will carry its own KB
-5. `VERIFIED.md` if the project has external dependencies that need verification
+4. `.claude/knowledge/INDEX.md` if the user said yes in step 2
+5. `VERIFIED.md` if the user said yes in step 2
 
 ## Step 4 — Verify
 
-Run `preflight` (should be on PATH after setup). Show the full output. If it fails, list the
-exact commands to fix each issue.
+Run `which preflight`. If it is missing, say so and point to the setup (`deploy.sh` in the
+private setup repo installs it). Otherwise run it and show the full output; if it fails, list
+the exact commands to fix each issue.
 
 ## Hard rule
 
