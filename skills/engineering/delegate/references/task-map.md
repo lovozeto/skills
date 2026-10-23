@@ -14,7 +14,7 @@ Always choose the cheapest tier that clears the quality bar. Never downgrade qua
 ## Models
 
 Source of truth for the IDs: the header of the `ask-opencode` wrapper
-(`lobomorir-claude/shared/.claude/scripts/ask-opencode`). Per-model system prompts live
+(`lobomorir-ai-setup/shared/.claude/scripts/ask-opencode`, installed as `~/.local/bin/ask-opencode`). Per-model system prompts live
 next to it in `opencode-prompts/`.
 
 | Model ID | Best for |
