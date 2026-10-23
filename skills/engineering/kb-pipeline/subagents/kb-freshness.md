@@ -4,6 +4,7 @@ You keep the KB current. **Run on demand, never during active work sessions.**
 
 ## When to invoke
 
+- `preflight` lists the file as expired (its `review_by` has passed). This is the main trigger.
 - Quarterly review.
 - A publisher released a major version.
 - A KB query returned an answer that felt stale.
@@ -19,6 +20,10 @@ If `age > refresh_after_days` (thresholds from `sources.yml` per base):
 - **Source dead or moved** → write `⚠️ Source at {url} unreachable, requires manual verification`. Never silently keep a source you could not verify.
 
 Thresholds come from `sources.yml`, per base. Do not invent them.
+
+After any refresh of a file (changed or not), set its file-level `last_verified` to today and
+`review_by` to today + `refresh_after_days`. Never move `review_by` forward without having
+checked the sources.
 
 ## Step 2 — Portal rescan
 

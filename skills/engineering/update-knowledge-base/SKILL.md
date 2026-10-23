@@ -35,7 +35,8 @@ Use this when you know exactly what changed and where.
 
 4. **Gate.** Present the draft. **STOP.** Do not write without explicit approval.
 
-5. **Write** the approved change to the KB file. Update `last_verified` on the entry.
+5. **Write** the approved change to the KB file. Update `last_verified` on the entry. If the
+   file has a `review_by`, leave it: one entry verified is not the whole file verified.
    Do not change any other entry in the file.
 
 ## Hard rules

@@ -7,7 +7,9 @@ You merge the `.raw/` intermediates for one base into the final KB file. Mechani
 - Deduplicate identical rules, preserving **all** attributions.
 - Group by topic.
 - Compose the final frontmatter: `id`, `category`, `sources` (all, with publisher and
-  `last_verified`), `discovered_via`, `created`, `refresh_after_days`, `tier: advisory`.
+  `last_verified`), `discovered_via`, `created`, `refresh_after_days`, `tier: advisory`, and
+  file-level `last_verified` + `review_by` (`review_by` = `last_verified` + `refresh_after_days`).
+  `preflight` reads `review_by` to flag expired files at session start.
 - Every rule keeps its inline attribution.
 
 ## What you do NOT do
