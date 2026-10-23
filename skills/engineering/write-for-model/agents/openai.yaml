@@ -1,5 +1,3 @@
 interface:
   display_name: "Write for Model"
   short_description: "Build an optimized prompt for a specific local or delegation model target"
-policy:
-  allow_implicit_invocation: false

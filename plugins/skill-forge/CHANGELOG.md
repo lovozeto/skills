@@ -19,10 +19,22 @@ follow semver (patch = fix, minor = new capability, major = breaking).
   `writing-for-agents`; every finding cites rule + source; flags an expired KB.
 - **KB expiry**: every KB file carries `last_verified` + `review_by` (volatility table in
   `kb/sources.md`); generated KBs get the same. Matt's `writing-for-agents` added as a source.
+### Changed (prompt review, opus)
+- forge-wizard rewritten after `agent-prompt-reviewer` findings: one source per rule (approval
+  gate, branching), positive phrasing, per-companion fallbacks, checkable completion criteria
+  per phase, a final "Done when" checklist, archiving moved to `references/archiving.md`,
+  `Skill` added to `allowed-tools`, skill calls phrased "Call the Skill tool with …".
+- Phase 0 reads the user's and the target repo's conventions into the Ledger.
+- Phase 3b keeps invocation in sync across Claude Code and Codex (`agents/openai.yaml`).
+- Phase 5c runs `claude plugin validate` on every touched plugin.
+- `agent-prompt-reviewer`: absolute KB path, defined severity/verdict, file fallback for
+  `writing-for-agents`, KB rules in the checklist, explicit "no findings".
+- `refresh-forge-kb`: confirmation before any write; global-index pointer opt-in; scheduled
+  runs stop before writing.
+- SessionStart hook is silent unless a `kb/` file has expired.
 ### Changed
 - `forge-wizard` is now **model-invoked** (Claude reaches it when you ask to build or fix a
   skill, agent, or plugin).
-- SessionStart hook trimmed to one pointer line (the rules live in the skill and `kb/`).
 - `refresh-forge-kb` sets `review_by` on every refreshed file and runs when a file expires.
 
 ## [0.2.0] — 2026-08-21

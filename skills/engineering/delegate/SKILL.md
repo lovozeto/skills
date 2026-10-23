@@ -67,7 +67,7 @@ credentials, `.env` files, personal data, or client material. Keep it in Claude.
 2. **Choose the model** from `references/task-map.md`. Pick the cheapest model that clears
    the bar — never downgrade quality to save. Exact IDs come from the map, not from memory.
 
-3. **Write the prompt with `/write-for-model`, not freehand.** Small models fail differently
+3. **Write the prompt: call the Skill tool with "write-for-model".** Small models fail differently
    than Claude: they ask for clarification instead of answering, or ignore the format. Put the
    **output lock in the first lines** ("NEVER ask questions. NEVER explain. Output only the
    JSON."), keep the structure **flat**, and add **few-shot** examples including the empty case.

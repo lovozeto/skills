@@ -62,7 +62,7 @@ Task to build a prompt for:
 [user's task description]
 ```
 
-Then invoke `/prompt-master` with this enriched input.
+Then call the Skill tool with "prompt-master", passing this enriched input.
 
 ## Step 4 — Validate the output
 

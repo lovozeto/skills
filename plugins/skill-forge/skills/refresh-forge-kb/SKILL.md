@@ -1,6 +1,6 @@
 ---
 name: refresh-forge-kb
-description: Refresh the skill-forge knowledge base and packaged templates from credible sources (Claude/Anthropic, Claude Code, agentskills.io, OpenAI, OpenCode Zen, Gemini, Kimi, Nielsen Norman, agent eval guides). On-demand and schedulable. Use when the user wants to update best practices, refresh the model catalog, or re-sync the skill-forge KB/templates.
+description: Refresh the skill-forge KB and templates from their listed sources, through three confirmed gates.
 disable-model-invocation: true
 argument-hint: "sources or 'all'"
 model: opus
@@ -9,22 +9,18 @@ allowed-tools: Read, Write, Edit, Bash, Task, WebFetch, WebSearch
 
 # refresh-forge-kb — keep the KB and templates current
 
-You are the **master orchestrator** of the KB refresh. You do not fetch and write freely: you
-run three gates and delegate each source to a **single-task** curator. The KB is the wizard's
+You are the **master orchestrator** of the KB refresh. You run three gates and delegate each source to a **single-task** curator. The KB is the wizard's
 source of truth, so correctness beats coverage.
 
 ## Scope & effect
 **Effective** (writes to `../../kb/` and `../../assets/templates/`). Every write passes the
-review gate and an explicit confirmation. Never fetch on a recurring schedule silently — ask
-before each refresh. On-demand; schedulable via `/schedule` (the user opts in).
+review gate and an explicit confirmation. Each interactive run asks before fetching. A
+scheduled run (opt-in via `/schedule`) runs Gates 1–2 with the pre-approved source list and
+stops with its findings; writes happen only in an interactive run, after confirmation.
 
 ## Mandatory model
-Orchestrator: `opus` (native). Equivalence: closest available reasoning tier from
-`../../kb/model-catalog.md`; Claude tier ladder as last resort, stated.
-
-## When to run
-When the user's session preflight lists a skill-forge KB file as expired, or when
-`forge-wizard` reports an expired KB before building. High-volatility files expire monthly.
+Orchestrator: `opus` (native). Equivalence: the strongest available reasoning tier from
+`../../kb/model-catalog.md`; say so if stepped down.
 
 ## Sources
 Read `../../kb/sources.md`. Treat `(verify)` URLs as unconfirmed — confirm the real URL

@@ -1,5 +1,3 @@
 interface:
   display_name: "KB Pipeline"
   short_description: "Research, update, or refresh a knowledge base with mandatory curation gates"
-policy:
-  allow_implicit_invocation: false

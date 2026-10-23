@@ -1,5 +1,5 @@
 {
-  "description": "skill-forge guardrails. SessionStart emits one pointer line to the forge-wizard skill. This is a sensor: it emits context and never returns a permission decision.",
+  "description": "skill-forge guardrails. SessionStart stays silent unless a kb/ file has expired, then asks for /refresh-forge-kb. This is a sensor: it emits context and never returns a permission decision.",
   "hooks": {
     "SessionStart": [
       {

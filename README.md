@@ -34,6 +34,7 @@ npx skills add lovozeto/skills -g -y
 
 | Skill | What it does |
 |---|---|
+| `/ask-wolf` | Router: which skill or flow fits your situation (manual) |
 | `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
 | `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
 

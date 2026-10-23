@@ -1,0 +1,3 @@
+interface:
+  display_name: "Forge Wizard"
+  short_description: "Build, fix, or review a Claude Code skill, agent, or plugin through a gated wizard"
