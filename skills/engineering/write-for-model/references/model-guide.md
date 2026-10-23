@@ -5,36 +5,45 @@ new behavior. Each section documents strengths, gotchas, and the recommended pro
 
 ---
 
-## opencode free models (cloud, agentic)
+## Free cloud models via `ask-opencode` (measured 2026-10-23)
 
-These models run agentic loops (read/write files, bash). NOT for private code.
+Run through `ask-opencode`, which isolates them (no `CLAUDE.md`, empty folder in text mode).
+Free ids rotate: the live list and measured results are in the `delegate` skill's
+`references/task-map.md`. NOT for private code or personal data.
 
-### `opencode/north-mini-code-free`
-- Best for: fast, mechanical tasks — linting, formatting, small refactors
-- Gotchas: limited reasoning; short context window; will hallucinate API details
-- System prompt: minimal or none; put all constraints in the user message
-- User message: imperative first line, then context; avoid numbered multi-step lists
+Shared shape that worked for every model in the benchmark:
+- Output lock first: "Output ONLY <format>, no code fences." Then the task, then the input.
+- Name the exact schema and a value for ambiguous fields (e.g. `Use "yo" for the person
+  writing`): without it, models invented "Usuario".
+- For agentic edits, say what must stay untouched ("change nothing else; string literals and
+  comments stay"): three models renamed a string literal the task excluded.
+- For rewrites, list the facts that must survive ("keep the deadline"): three Gemini models
+  dropped it.
+- Ask for a fixed final reply ("reply exactly: DONE") and check it: glm and the Nemotron
+  models explained instead.
 
-### `opencode/laguna-s-2.1-free`
-- Best for: multi-step coding tasks, terminal agent workflows
-- Gotchas: **avoid nested arrays or deeply nested JSON in the prompt** — loses structure
-- System prompt: one paragraph, plain prose; no bullets
-- User message: flat structure; use code blocks for code, plain text for instructions
+### `opencode/deepseek-v4.1-flash-free` (default)
+- Best for: extraction, rewrites, conversions, agentic edits. 3/3 correct, 3–11 s.
+- Data: zero retention, no training.
 
-### `opencode/nemotron-3-ultra-free`
-- Best for: reasoning, complex debugging, analysis
-- Gotchas: **system prompt should be minimal or empty** — heavy system prompts reduce reasoning quality; avoid CoT instructions (it does CoT by default)
-- User message: state the problem clearly; let it reason; don't over-constrain format
+### `opencode/glm-5.3-flash-free`
+- Best for: images, PDFs, screenshots; warm Spanish rewrites.
+- Gotcha: tends to explain instead of the fixed final reply.
+- Data: zero retention, no training.
 
-### `opencode/mimo-v2.5-free`
-- Best for: tasks with screenshots, UI description, multimodal input
-- Gotchas: weak at pure code generation
-- System prompt: describe the output format; it follows formatting instructions well
-- User message: describe what you see, then what you want
+### `opencode/beam-free`
+- Best for: fast short tasks (titles, summaries). Flatter tone in rewrites.
+- Data: no training, 30-day retention, region-limited.
+
+### `google/gemini-3.1-flash-lite` (fallback, non-sensitive only)
+- Good at JSON and code edits; dropped meaning in a rewrite.
+- Data: free tier — Google may use and human-review prompts.
 
 ---
 
-## LM Studio models (local, one-shot, private)
+## LM Studio models (local, one-shot, private) — PAUSED
+
+Local delegation is paused (see `delegation.md`). Kept as a measured record.
 
 These run via `ask-local`. No internet. Context size varies by model.
 
@@ -60,7 +69,7 @@ These run via `ask-local`. No internet. Context size varies by model.
 
 ---
 
-## Apple on-device (via `ask-apple`)
+## Apple on-device (via `ask-apple`) — PAUSED
 
 - Best for: short, structured, fast tasks (~2s). Classification by form, quick rewrites.
 - Hard limit: macOS ≥ 26 required. No internet. Very short context.

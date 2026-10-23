@@ -1,6 +1,6 @@
 ---
 name: <SKILL_NAME>
-description: <WHAT_IT_DOES_AND_WHEN_TO_TRIGGER — be specific and a little pushy so it fires; put all "when to use" here, not in the body>
+description: <WHAT_IT_DOES_AND_WHEN_TO_TRIGGER — front-load the trigger word, one trigger per branch, say when NOT to use; keep "when to use" out of the body>
 model: <haiku|sonnet|opus|inherit>   # MANDATORY: orchestrator tier from kb/model-catalog.md
 allowed-tools: <Read, Write, Edit, Bash, Task, ...>
 ---

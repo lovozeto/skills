@@ -2,19 +2,19 @@
 
 The wizard's source of truth. **Pointer, never copy** into generated artifacts. Every entry
 carries a `tier`: `advisory` guides decisions; **only `proven` can back code** (someone ran
-it and pasted the output). Seed entries are `advisory` and marked *unverified* until
-`/refresh-forge-kb` confirms them against live sources.
+it and pasted the output). Entries were seeds until the first
+`/refresh-forge-kb` (2026-10-23) checked them against live sources.
 
 | Entry | File | Tier | Last updated |
 |---|---|---|---|
-| Credible sources list | `sources.md` | advisory | seed (unverified) |
-| Multi-provider model catalog | `model-catalog.md` | advisory | seed (unverified) |
-| Best practices — agents | `best-practices/agents.md` | advisory | seed (unverified) |
-| Best practices — skills | `best-practices/skills.md` | advisory | seed (unverified) |
-| Best practices — plugins | `best-practices/plugins.md` | advisory | seed (unverified) |
-| Best practices — hooks | `best-practices/hooks.md` | advisory | seed (unverified) |
-| Best practices — prompting | `best-practices/prompting.md` | advisory | seed (unverified) |
-| Best practices — UX heuristics | `best-practices/ux-heuristics.md` | advisory | seed (unverified) |
+| Credible sources list | `sources.md` | advisory | 2026-10-23 |
+| Multi-provider model catalog | `model-catalog.md` | advisory | 2026-10-23 |
+| Best practices — agents | `best-practices/agents.md` | advisory | 2026-10-23 |
+| Best practices — skills | `best-practices/skills.md` | advisory | 2026-10-23 |
+| Best practices — plugins | `best-practices/plugins.md` | advisory | 2026-10-23 |
+| Best practices — hooks | `best-practices/hooks.md` | advisory | 2026-10-23 |
+| Best practices — prompting | `best-practices/prompting.md` | advisory | 2026-10-23 |
+| Best practices — UX heuristics | `best-practices/ux-heuristics.md` | advisory | 2026-10-23 |
 
 ## Expiry
 Each file's frontmatter carries `last_verified` and `review_by` (volatility table in

@@ -1,29 +1,35 @@
 ---
 tier: advisory
-last_verified: unknown
-review_by: 2026-10-22
+last_verified: 2026-10-23
+review_by: 2026-11-23
 ---
 
 # Best practices — hooks
 
-`tier: advisory` · seed (unverified). Refresh via `/refresh-forge-kb`.
+`tier: advisory` · refreshed 2026-10-23 from Claude Code hooks docs (partially read: per-event
+input payloads not covered).
 
-- **Hooks are a plugin feature.** Declared in `hooks/hooks.json` under event keys
-  (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, ...). Commands
-  reference `${CLAUDE_PLUGIN_ROOT}`.
-- **Guardrail, not decoration.** Use hooks to stop what must not happen: gate missing
-  dependencies, block out-of-scope writes, require confirmation before irreversible actions,
-  verify on `Stop`.
-- **Sensor vs decision.** A hook that only emits `additionalContext` is a *sensor*. A hook
-  that returns a `permissionDecision` (`allow|ask|deny`) on `PreToolUse` is a *gate*. Know
-  which you are writing.
-- **Matchers.** `PreToolUse`/`PostToolUse` take a `matcher` (e.g. `Bash|Write|Edit`) to scope
-  when they fire.
-- **Fail safe and fast.** Keep hook scripts quick, with a timeout; never let a hook install
-  software on its own — it asks permission and blocks.
-- **Valid JSON out.** Hook stdout must be valid JSON in the expected shape, or the hook is
-  ignored.
-
-## To verify / expand via refresh
-- Exact Claude Code hook event names, input payloads, and output schema (permission decisions,
-  additionalContext, async rewake).
+- **Where.** Plugin `hooks/hooks.json` (events under a top-level `"hooks"` key) or settings.
+  Handler types: `command`, `http`, `mcp_tool`, `prompt`, `agent`. Commands reference
+  `"${CLAUDE_PLUGIN_ROOT}"` (quoted).
+- **Events.** SessionStart/End, UserPromptSubmit, PreToolUse, PermissionRequest, PostToolUse,
+  PostToolUseFailure, Stop, SubagentStart/Stop, PreCompact/PostCompact, and more.
+- **Matchers.** Exact name or `A|B` list; anything else is an unanchored regex (`^…$` to
+  anchor). SessionStart matches `startup|resume|clear|compact`. Some events take no matcher
+  (UserPromptSubmit, Stop).
+- **Exit codes.** 0 = success (JSON parsed). 2 = blocking (stderr is the reason) on events
+  that can block (PreToolUse, UserPromptSubmit, Stop…; not SessionStart or PostToolUse). Any
+  other code, including 1, does **not** block.
+- **Gate vs sensor.** A sensor emits `additionalContext` (inside `hookSpecificOutput` with
+  `hookEventName`; ≤10k chars). A gate returns `permissionDecision` on PreToolUse:
+  `allow | deny | ask | defer` (`defer` only in `-p` mode). `ask` shows the reason to the user;
+  a hook `allow` does not override a deny/ask permission rule; across hooks deny > defer > ask
+  > allow.
+- **Write context as facts.** `additionalContext` arrives as a system reminder; factual
+  statements work, imperative "system" instructions can trip prompt-injection defenses.
+- **Stdout is only the JSON.** Shell-profile output breaks parsing; malformed JSON fails open
+  (the action proceeds) unless `onFailure: "block"`.
+- **Fast and safe.** Default command timeout is 600 s: set a short one. A hook never installs
+  software on its own; it explains, asks, and blocks.
+- **Guardrail, not decoration.** Gate missing deps, out-of-scope writes, irreversible actions;
+  verify on Stop.

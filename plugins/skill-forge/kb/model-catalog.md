@@ -1,61 +1,51 @@
 ---
 tier: advisory
-last_verified: unknown
-review_by: 2026-10-22
+last_verified: 2026-10-23
+review_by: 2026-11-23
 ---
 
 # Model catalog (Claude-first, cloud only)
 
-Source of truth for the **mandatory model** field. **Claude is the base**: every
-recommendation is expressed as a Claude tier first. The other providers are here so that an
-artifact carries **coherent instructions across stacks** — if the person running it uses
-ChatGPT or OpenCode instead of Claude, the mandatory-model field maps to a sensible
-equivalent. **No local models** (that concern lives separately in `delegate`).
-
-Goal: **optimize tokens while holding quality**. Pick the cheapest capable model per role.
-
-`tier`: `advisory` guides; `proven` = verified in use. Provider rows marked **(verify)** are
-seeds — do not treat their ids/prices as fact until `/refresh-forge-kb` confirms them.
+Source of truth for the **mandatory model** field. **Claude is the base**; the other providers
+keep an artifact's instructions coherent if it runs under ChatGPT, OpenCode, or Gemini.
+Goal: **optimize tokens while holding quality** — the cheapest model that clears the bar.
+Refreshed 2026-10-23 from Anthropic, OpenAI, OpenCode Zen, and Google docs (`sources.md`).
 
 ## Roles
-- **Orchestrator** — reasoning, decisions, planning, QA. Needs a strong model.
-- **Worker** — one narrow task (extract, classify, transform, boilerplate). Needs the
-  cheapest model that clears the task's bar.
+- **Orchestrator** — reasoning, decisions, planning, QA.
+- **Worker** — one narrow task; the cheapest model that clears its bar.
 
-## Base — Claude tiers (native; go in `model:`)
+## Base — Claude (native)
 
-| Role | Tier | Notes | tier |
+| Tier | Model id | Price $/MTok in/out | Use |
 |---|---|---|---|
-| Orchestrator | `opus` | Max reasoning / architecture / QA | advisory |
-| Orchestrator/Worker | `sonnet` | Most reasoning + code; default workhorse | advisory |
-| Worker | `haiku` | Precise, light language tasks; cheapest Claude | advisory |
-| — | `inherit` | Match the caller's model | advisory |
+| `fable` | `claude-fable-5-1` | 10 / 50 | Top reasoning, long-horizon agentic work; when Opus at high effort falls short |
+| `opus` | `claude-opus-5-5` | 4 / 20 | Recommended starting point; orchestrators, architecture, QA |
+| `sonnet` | `claude-sonnet-5-5` | 2 / 10 | Speed + intelligence; most workers with judgment |
+| `haiku` | `claude-haiku-5-5` | 0.10 / 0.50 | Classification, extraction, routing, high volume |
 
-> `model:` frontmatter accepts only `haiku | sonnet | opus | inherit`. The cross-provider
-> columns below are **guidance for the artifact's instructions**, never a `model:` value.
+All: 1M context, 128K output, adaptive thinking (always on for Fable 5.1 and Opus 5.5),
+knowledge cutoff Jun 2026. Subagent `model:` accepts `haiku | sonnet | opus | fable | <full
+id> | inherit`; a skill's `model:` takes any `/model` value or `inherit` and applies to that turn.
 
-## Cross-provider equivalents (for coherent instructions elsewhere)
+## Cross-provider equivalents (guidance in the artifact's text, never a `model:` value)
 
-Always state the Claude baseline; add the equivalent so the artifact stays coherent if the
-host assistant is ChatGPT or OpenCode. Fill exact model ids via `/refresh-forge-kb`.
-
-| Role | Claude (base) | ChatGPT / OpenAI | OpenCode Zen | Kimi / Moonshot |
+| Role | Claude (base) | OpenAI | Gemini | OpenCode Zen (free, `proven` 2026-10-23) |
 |---|---|---|---|---|
-| Orchestrator | `opus` / `sonnet` | a top reasoning tier **(verify id)** | a paid orchestrator-grade model **(verify id)** | long-context flagship **(verify id)** |
-| Worker (light) | `haiku` | a small/cheap tier **(verify id)** | a free-tier worker **(verify id)** | a light tier **(verify id)** |
-| Worker (code) | `sonnet` | a coding-capable tier **(verify id)** | a coding model **(verify id)** | — |
+| Orchestrator | `opus` / `fable` | `gpt-6-astra` | `gemini-4-argon` (paid only) | — (keep orchestration on a paid model) |
+| Worker (judgment) | `sonnet` | `gpt-6.1-sol` | `gemini-3.8-flash` | `deepseek-v4.1-flash-free` |
+| Worker (light) | `haiku` | `gpt-6-luna` | `gemini-3.1-flash-lite` | `deepseek-v4.1-flash-free` / `beam-free` |
+| Worker (images/PDF) | `sonnet` | `gpt-6.1-sol` | `gemini-3.8-flash` | `glm-5.3-flash-free` |
+
+Free tiers: Zen free ids are "limited time" promotions and rotate; Gemini's free tier lets
+Google use and human-review prompts. Never route private material to a free model. Kimi
+(`kimi-k3`, paid on Zen) is not curated.
 
 ## How the wizard uses this
-
-1. Choose the **Claude tier** for the role (base). Put it in `model:` when the artifact runs
-   under Claude.
-2. In the agent body, add a one-line **cross-provider note** so the instruction is coherent
-   elsewhere, e.g.: *"Model: `sonnet` (Claude base). If run under ChatGPT use <equivalent>;
-   under OpenCode use <Zen equivalent>."*
-3. **Equivalence within Claude:** if the recommended tier is unavailable, step down/up the
-   Claude ladder and say so. Never assume a specific cross-provider model exists — mark it
-   `advisory` until verified.
+1. Choose the Claude tier for the role and put it in `model:` (with the reason).
+2. Add a one-line cross-provider note in the agent body.
+3. If the tier does not fit, step along the Claude ladder and say so.
 
 ## Maintenance
-`/refresh-forge-kb` fills the ChatGPT / OpenCode Zen / Kimi ids and pricing from `sources.md`
-with provenance, and promotes a row to `proven` only when verified in real use.
+`/refresh-forge-kb` refreshes ids and prices; a free model is `proven` only after a real call
+succeeds on this machine (Zen's list and `models.dev` lag behind reality).
