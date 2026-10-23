@@ -10,7 +10,8 @@ The raw scan of a full CD can be megabytes. This summary is what gets read into
 the conversation; individual records are looked up on demand.
 
 Usage: summarize_scan.py <raw_scan.json> <summary.json>
-Exit codes: 0 = ok · 2 = bad usage or unreadable input.
+Env:   PHOTO_ARCHIVE_HOME_OFFSET  home UTC offset, e.g. "-05:00" (default; Colombia)
+Exit codes: 0 = ok · 2 = bad usage, unreadable input, or a malformed offset.
 """
 
 import json
@@ -27,8 +28,14 @@ from datetime import datetime
 # not a genuinely older photograph.
 MIN_PLAUSIBLE_YEAR = 1990
 
-# Colombia (America/Bogota) is UTC-05:00 year-round — no daylight saving.
-COLOMBIA_UTC_OFFSET = "-05:00"
+# The owner's home timezone. A photo stamped with another offset was taken while
+# travelling, or by a camera never reconfigured. Default: Colombia (America/Bogota),
+# UTC-05:00 year-round with no daylight saving.
+HOME_UTC_OFFSET = os.environ.get("PHOTO_ARCHIVE_HOME_OFFSET", "-05:00").strip()
+OFFSET_RE = re.compile(r"^[+-]\d{2}:\d{2}$")
+
+# Keep the candidate list readable; the rest is reachable in the raw scan with jq.
+MAX_DATE_HINT_CANDIDATES = 500
 
 # A capture date and a filesystem date more than this many years apart means the
 # original date did not survive the copy off the CD.
@@ -77,8 +84,8 @@ def tz_offset(rec):
 
     Only EXIF offset tags count. The offset glued onto FileModifyDate is the
     timezone of the machine that copied the file, not of the camera that shot
-    it — trusting it would make every photo on a Colombian Mac look correctly
-    stamped -05:00 and silently defeat the whole timezone check.
+    it — trusting it would make every photo look stamped with the home offset
+    and silently defeat the whole timezone check.
     """
     for key in ("OffsetTimeOriginal", "OffsetTime"):
         val = rec.get(key)
@@ -94,6 +101,10 @@ def main():
         return 2
 
     raw_path, out_path = sys.argv[1], sys.argv[2]
+    if not OFFSET_RE.match(HOME_UTC_OFFSET):
+        print("ERROR: PHOTO_ARCHIVE_HOME_OFFSET must look like -05:00, got %r"
+              % HOME_UTC_OFFSET, file=sys.stderr)
+        return 2
     try:
         with open(raw_path, "r", encoding="utf-8", errors="replace") as fh:
             records = json.load(fh)
@@ -144,19 +155,23 @@ def main():
         cap = capture_date(rec)
         cap_year = parse_year(cap)
 
-        if not cap:
-            flag("no_capture_date", name)
-            # Folder + filename often still encode a date. Extracting that from
-            # messy text is the one genuinely delegable subtask in this skill.
+        impossible = bool(cap) and (cap_year < MIN_PLAUSIBLE_YEAR or cap_year > this_year)
+
+        if not cap or impossible:
+            if not cap:
+                flag("no_capture_date", name)
+            else:
+                # A reset camera clock: the date is noise, treat it as absent.
+                flag("impossible_date", "%s (%s)" % (name, cap))
+            # Folder + filename often still encode a date ("Navidad 99").
             date_hint_candidates.append({
                 "file": name,
                 "folder": os.path.basename(folder),
+                "reason": "no_capture_date" if not cap else "impossible_date",
             })
         else:
             f["capture_years"].append(cap_year)
             f["capture_stamps"].append(cap)
-            if cap_year < MIN_PLAUSIBLE_YEAR or cap_year > this_year:
-                flag("impossible_date", "%s (%s)" % (name, cap))
 
             # The day is usable, the time is not. Matters because sorting by
             # timestamp would collapse the whole folder onto midnight.
@@ -171,8 +186,8 @@ def main():
         offset = tz_offset(rec)
         if offset is None:
             flag("tz_missing", name)
-        elif offset != COLOMBIA_UTC_OFFSET:
-            flag("tz_not_bogota", "%s (%s)" % (name, offset))
+        elif offset != HOME_UTC_OFFSET:
+            flag("tz_not_home", "%s (%s)" % (name, offset))
 
         if ext in LEGACY_CONTAINERS:
             flag("legacy_container", "%s (.%s)" % (name, ext))
@@ -191,12 +206,13 @@ def main():
         "folder_count": len(folders),
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "conventions": {
-            "colombia_utc_offset": COLOMBIA_UTC_OFFSET,
+            "home_utc_offset": HOME_UTC_OFFSET,
             "min_plausible_year": MIN_PLAUSIBLE_YEAR,
         },
         "folders": [],
-        # Handed to a local model for date-hint extraction (see SKILL.md).
-        "date_hint_candidates": date_hint_candidates[:500],
+        # Claude infers date hints for these from file and folder names (SKILL.md step 4).
+        "date_hint_candidates": date_hint_candidates[:MAX_DATE_HINT_CANDIDATES],
+        "date_hint_candidates_total": len(date_hint_candidates),
         # Containers alone do not decide video compatibility; Claude probes these.
         "videos_to_probe": videos_to_probe,
     }
@@ -210,7 +226,7 @@ def main():
         if len(stamps) > 1 and len(set(stamps)) == 1:
             data["flags"]["identical_timestamps"] = len(stamps)
             data["examples"]["identical_timestamps"] = [
-                "todas las %d comparten %s" % (len(stamps), stamps[0])
+                "all %d share %s" % (len(stamps), stamps[0])
             ]
 
         summary["folders"].append({

@@ -1,182 +1,134 @@
 ---
 name: inspecting-photo-archives
-description: Inspecciona carpetas de fotos y videos viejos (importados de CDs, DVDs o discos externos) y produce un reporte de metadata para poder importarlos con criterio. Reporta fecha de captura, cámara, zona horaria, fechas perdidas en la copia y formatos en riesgo. Es de solo lectura, nunca modifica los archivos. Usar cuando el usuario mencione fotos de CDs, fotos viejas o escaneadas, metadata o EXIF, fotos sin fecha o desordenadas, revisar o auditar una carpeta de fotos antes de importarla, o pregunte qué cámara/fecha tiene una foto. También para "check my old photos", "EXIF report", "photos have no date".
+description: Inspect folders of old photos and videos (copied from CDs, DVDs, or external drives) and produce a read-only metadata report for importing them with judgement — capture date, camera, timezone, dates lost in the copy, at-risk formats. Use when the user mentions old or scanned photos, photos from CDs, EXIF or metadata, photos with no date or out of order ("fotos viejas", "fotos sin fecha"), auditing a photo folder before importing it, or asks which camera or date a photo has. Not for converting, renaming, or moving files.
 ---
 
-# Inspeccionar archivos de fotos viejas
+# Inspect old photo archives
 
-Produce un reporte que permita importar fotos viejas **con criterio**: qué hay, qué
-metadata tiene, qué se perdió al copiarlas del CD, y qué formatos conviene mirar.
+Produces a report for importing old photos **with judgement**: what is there, what metadata
+it has, what was lost when it was copied off the CD, and which formats deserve a look.
 
-> **Regla dura: este skill es de SOLO LECTURA.** Nunca modificar, mover, renombrar ni
-> convertir un archivo del archivo original. Si el usuario pide convertir, decir que
-> eso es otro skill (`optimizing-legacy-media`) y que primero hay que aprobar este
-> reporte. Los originales son irreemplazables.
+> **Hard rule: this skill is READ-ONLY.** NEVER modify, move, rename, or convert a file in
+> the original archive: originals are irreplaceable. If the user asks to convert, say that
+> conversion is outside this skill and comes only after this report is approved.
 
-Copiá esta checklist y marcá a medida que avanzás:
+Copy this checklist and tick it as you go:
 
 ```
-- [ ] Paso 0: preflight de dependencias
-- [ ] Paso 1: escanear metadata (read-only)
-- [ ] Paso 2: resumir a formato compacto
-- [ ] Paso 3: juzgar formatos en riesgo (con ffprobe)
-- [ ] Paso 4: inferir fechas desde nombres (delegado + QA)
-- [ ] Paso 5: preguntar fechas estimadas al usuario
-- [ ] Paso 6: emitir reporte JSON + markdown
+- [ ] Step 0: dependency preflight
+- [ ] Step 1: scan metadata (read-only)
+- [ ] Step 2: summarize
+- [ ] Step 3: judge at-risk formats (ffprobe)
+- [ ] Step 4: infer dates from names
+- [ ] Step 5: ask the user for estimated dates
+- [ ] Step 6: write the report
 ```
 
-## Paso 0 — Preflight de dependencias
+**Output folder.** `OUT` = `$HOME/Documents/photo-archive-reports/<scope>/<YYYY-MM-DD>`, where
+`<scope>` is the folder or CD name. Always expand it to an absolute path; `~` inside quotes is
+not expanded. Dated folders are a deliberate exception to the house "no dated folders" rule:
+these reports live outside any repo, so the dates are their only history.
+
+## Step 0 — Dependency preflight
 
 ```bash
 bash "${CLAUDE_SKILL_DIR}/scripts/check_deps.sh"
 ```
 
-Sale con código 3 y un `install_command` si falta algo. Si falta:
+It exits 3 with an `install_command` when something is missing. Then:
 
-1. Decile al usuario **qué** falta y **para qué** sirve (`exiftool` = leer metadata de
-   fotos y video; `ffmpeg`/`ffprobe` = identificar el códec real adentro de un video).
-2. **Pedí confirmación explícita antes de instalar** — instalar cambia su sistema.
-3. Con el OK: `brew install <lo que falte>`.
+1. Tell the user **what** is missing and **what it is for** (`exiftool` reads photo and video
+   metadata; `ffmpeg`/`ffprobe` identify the real codec inside a video).
+2. **Ask for explicit confirmation before installing** — installing changes their system.
+3. With the OK: `brew install <what is missing>`.
 
-**Sin el OK, los dos no degradan igual:**
+Without the OK, the two degrade differently:
 
-| Falta | Consecuencia |
+| Missing | Consequence |
 |---|---|
-| `exiftool` | **Bloqueante.** `scan_archive.sh` sale con código 2 — no hay escaneo posible. Decilo y frená; no hay modo reducido. |
-| `ffprobe` | **Degradable.** Todo corre salvo el Paso 3: los videos quedan **sin clasificar** (el contenedor no alcanza). Seguí y marcá en el reporte qué videos quedaron sin verificar. |
+| `exiftool` | **Blocking.** `scan_archive.sh` exits 2; there is no scan. Say so and stop. |
+| `ffprobe` | **Degradable.** Everything runs except Step 3; videos stay **unclassified**. Continue and list them as unverified in the report. |
 
-Estas dependencias son de **capa skill**, no de host: se declaran acá y las chequea
-`check_deps.sh`. **No van a `INSTALL.md`.**
+Done when `check_deps.sh` exits 0, or `exiftool` is present and the missing `ffprobe` is recorded.
 
-## Paso 1 — Escanear (read-only)
+## Step 1 — Scan (read-only)
 
 ```bash
-bash "${CLAUDE_SKILL_DIR}/scripts/scan_archive.sh" "<carpeta>" "<salida>/raw-scan.json"
+bash "${CLAUDE_SKILL_DIR}/scripts/scan_archive.sh" "<archive folder>" "$OUT/raw-scan.json"
 ```
 
-`<salida>` = `~/Documents/photo-archive-reports/<scope>/<YYYY-MM-DD>/`, donde `<scope>`
-es el nombre de la carpeta o del CD. Cada corrida crea su carpeta con fecha; las
-anteriores se conservan.
+Done when it exits 0 and `raw-scan.json` exists. Exit 2 = stop and report the error.
 
-**No leas `raw-scan.json` entero en la conversación** — el escaneo de un CD entero
-puede ser de megabytes. Para eso está el paso 2.
-
-## Paso 2 — Resumir
+## Step 2 — Summarize
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/summarize_scan.py" \
-  "<salida>/raw-scan.json" "<salida>/summary.json"
+PHOTO_ARCHIVE_HOME_OFFSET="-05:00" python3 "${CLAUDE_SKILL_DIR}/scripts/summarize_scan.py" \
+  "$OUT/raw-scan.json" "$OUT/summary.json"
 ```
 
-Leé `summary.json`. Trae, por carpeta: cantidad, rango de años, cámaras, formatos, y
-el conteo de estos flags con ejemplos:
-
-| Flag | Qué significa |
-|---|---|
-| `no_capture_date` | Sin `DateTimeOriginal` ni `CreateDate` — no se sabe cuándo se tomó |
-| `impossible_date` | Año < 1990 o futuro — pila de la cámara muerta, reloj reseteado |
-| `placeholder_time` | Fecha real pero hora `00:00:00` — la cámara grabó el día, no el reloj. **El día sirve, la hora no** |
-| `identical_timestamps` | Toda la carpeta comparte un timestamp — no se puede saber el orden interno |
-| `filedate_mismatch` | La fecha EXIF y la del archivo difieren > 1 año — **la fecha se perdió al copiar del CD** |
-| `tz_missing` | Sin offset de zona horaria (lo normal en cámaras viejas) |
-| `tz_not_bogota` | Offset presente pero ≠ `-05:00` — foto de viaje, o cámara nunca reconfigurada |
-| `legacy_container` | `.avi`, `.wmv`, `.mpg`, `.bmp`… — candidato a revisar, **no** a convertir todavía |
-
-Para consultar registros puntuales sin cargar todo, usá `jq` sobre el raw:
+Set `PHOTO_ARCHIVE_HOME_OFFSET` to the user's home UTC offset (default `-05:00`, Colombia).
+Read only `summary.json`; `raw-scan.json` can be megabytes, so query single records from it
+with `jq`:
 
 ```bash
-jq '.[] | select(.FileName=="IMG_0042.JPG")' "<salida>/raw-scan.json"
+jq '.[] | select(.FileName=="IMG_0042.JPG")' "$OUT/raw-scan.json"
 ```
 
-## Paso 3 — Juzgar formatos en riesgo
+Per folder, the summary has the count, year range, cameras, formats, and these flags with
+examples:
 
-**Leé `reference/format-risk.md` antes de clasificar nada.** Contiene el criterio y la
-razón por la que este juicio no se delega.
-
-> **El conocimiento vive en el KB.** La base **`media-formats`** se construyó el 2026-07-23
-> con fuentes reales (Library of Congress, PRONOM, FADGI, FFmpeg, Mozilla mozjpeg) más una
-> medición `tier: proven` en esta máquina. `reference/format-risk.md` quedó como **puntero +
-> regla operativa**; el conocimiento de formatos se lee de:
-> `~/dev/claude-kb/media-formats/video-codecs.md` (códecs y cómo identificarlos),
-> `image-formats.md` (imagen y operaciones sin pérdida) y `preservation-doctrine.md`
-> (doctrina y formatos objetivo). Todo `tier: advisory` salvo lo marcado `proven`.
->
-> **Corrección que cambia el reporte:** la versión anterior decía que Indeo "no abre en nada
-> moderno" — **falso**. `ffmpeg` decodifica todos los códecs legacy medidos. Distinguí
-> siempre **"no abre por doble clic"** (incomodidad) de **"no se puede decodificar"**
-> (pérdida real). Hoy casi todo cae en el primer caso, y **la urgencia real es el CD físico,
-> no el códec**.
-
-Regla central: **el contenedor no decide la compatibilidad, el códec adentro sí.** Para
-cada entrada de `videos_to_probe` en el summary, corré `ffprobe` (comando exacto en la
-referencia) y recién ahí clasificá alto/medio/bajo con la razón concreta.
-
-Nunca recomiendes re-comprimir un JPEG: es pérdida sin ganancia.
-
-## Paso 4 — Inferir fechas desde nombres (subtarea delegable)
-
-Para los `date_hint_candidates` del summary (archivos sin fecha de captura), el nombre
-del archivo y de la carpeta suelen tener la pista (`Cartagena 2004`, `IMG_20030714`,
-`Navidad 99`). Extraer campos de texto sucio es **voluminoso y simple en razonamiento**:
-es delegable hacia un modelo local.
-
-- El mapa tarea→wrapper→modelo es **`~/dev/claude-kb/delegation.md`** (runtime: skill
-  `/delegate`). No hardcodees IDs de modelos acá; se eligen según `hardware.md`.
-- **Usá el prompt canónico de [reference/delegable-prompts.md](reference/delegable-prompts.md)**
-  — está afinado con `prompt-master` y endurecido contra un fallo medido (un modelo chico
-  respondió pidiendo aclaraciones en vez de JSON). No lo reescribas a ojo. Sustituí
-  `{{CURRENT_YEAR}}` y `{{BATCH_JSON}}`, en lotes de ~40 items.
-- **Fallback:** si el wrapper sale con código ≠ 0, hacelo vos. Nunca falles la tarea por eso.
-
-> **QA de lo delegado (obligatorio):** toda salida que venga de un modelo delegado hacia
-> abajo se verifica antes de usarse. Los 6 chequeos exactos están en
-> [reference/delegable-prompts.md](reference/delegable-prompts.md) — incluido el
-> **spot-check de 3–5 casos**, que es el único que atrapa fechas inventadas (los demás solo
-> validan la forma). Si no pasa, se re-hace un tier más arriba. No asumas que otro ya revisó.
-
-Toda fecha inferida entra al reporte marcada como **inferida**, nunca como dato duro.
-
-## Paso 5 — Preguntar fechas estimadas
-
-Donde no haya ni EXIF ni pista utilizable, preguntá al usuario **por carpeta** (no por
-archivo) una fecha estimada, mostrándole el contexto que ya tenés: nombre de la carpeta,
-cantidad de fotos, cámaras detectadas, rango de años de las vecinas. Ofrecé "no sé" como
-opción válida — una carpeta sin fecha es un resultado legítimo.
-
-## Paso 6 — Emitir el reporte
-
-Escribí en `<salida>/`:
-
-- **`report.json`** — estructurado, para que lo consuma otro paso o skill.
-- **`report.md`** — legible, para decidir. Por carpeta: qué hay, rango de fechas, cámaras,
-  qué está mal, formatos a mirar, y **qué acción sugerida** (sin ejecutarla).
-
-Cerrá con un resumen de una frase: cuántos archivos, cuántos sin fecha confiable, cuántos
-formatos en riesgo, y cuál es el siguiente paso concreto.
-
-## Alcance
-
-Este skill **inspecciona y reporta**. No convierte, no renombra, no mueve, no importa.
-Si aparece otra tarea, decilo y frená — no amplíes por iniciativa propia.
-
-**Si disparás un subagente** (p. ej. para escanear un árbol muy grande en contexto aislado):
-lleva **un solo alcance**, corre en su propio contexto y devuelve **resultado o
-`FUERA DE ALCANCE`**. Nunca amplía por iniciativa propia. Un alcance por subagente: si
-aparece una segunda tarea, abrí otro. Eso es lo que hace barata la QA del que lo llamó.
-
-## Estado de verificación
-
-| Nivel | Estado |
+| Flag | Meaning |
 |---|---|
-| **0 — estructural** (`quick_validate`) | ✅ pasa (`Skill is valid!`) |
-| **1 — disparo** (eval de `description`) | ✅ **12/13** con `haiku` — ver `evals/results-2026-07-23.md` |
-| **Funcional end-to-end** | ⏳ **pendiente** — nunca corrió sobre un archivo real |
+| `no_capture_date` | No `DateTimeOriginal` or `CreateDate` — when it was taken is unknown |
+| `impossible_date` | Year < 1990 or in the future — a dead camera battery reset the clock; treated as no date |
+| `placeholder_time` | Real date, time `00:00:00` — the camera stored the day, not the clock. **The day is usable, the time is not** |
+| `identical_timestamps` | The whole folder shares one timestamp — the order inside it is unknown |
+| `filedate_mismatch` | EXIF date and file date differ by > 1 year — **the date was lost copying off the CD** |
+| `tz_missing` | No timezone offset (normal for old cameras) |
+| `tz_not_home` | An offset other than the home one — a trip, or a camera never reconfigured |
+| `legacy_container` | `.avi`, `.wmv`, `.mpg`, `.bmp`… — a candidate to look at, **not** to convert yet |
 
-Medido el 2026-07-23: **negativos 5/5** (incluido el vecino cercano "convertí este AVI a MP4",
-que es `optimizing-legacy-media`), positivos 7/8. El único fallo se re-corrió y resultó
-**varianza de muestreo, no un hueco**: la cadena idéntica disparó 2 de 3 veces. La
-`description` no se cambió.
+Done when `summary.json` is read and every flag count is noted per folder. If
+`date_hint_candidates_total` is larger than the list, say so and pull the rest from
+`raw-scan.json` with `jq`.
 
-**`run_eval.py` de `skill-creator` NO sirve para medir este skill:** crea un command temporal
-que compite con el skill real ya instalado globalmente y reporta 0 en todo. El método que sí
-funciona está documentado en `evals/results-2026-07-23.md`.
+## Step 3 — Judge at-risk formats
+
+Read `reference/format-risk.md` before classifying anything. Then run `ffprobe` (exact command
+there) on every entry in `videos_to_probe`, and classify each high / medium / low with the
+concrete reason. Done when every entry has a classification or is marked unverified.
+
+## Step 4 — Infer dates from names
+
+Candidates: every entry in `date_hint_candidates` (both `no_capture_date` and
+`impossible_date`). File and folder names often carry the date (`Cartagena 2004`,
+`IMG_20030714`, `Navidad 99`).
+
+Do this yourself, in this conversation. Delegate nothing: names in a family archive are
+personal data, and the only active delegation route is free cloud models. Apply the rules,
+examples, and QA checks in `reference/date-hint-rules.md` to each batch.
+
+Every inferred date enters the report marked **inferred**, never as hard data. Done when every
+candidate has a hint or `null`, and the QA checks passed.
+
+## Step 5 — Ask for estimated dates
+
+Where there is no trustworthy EXIF date (missing or `impossible_date`) and no usable hint, ask
+the user **per folder** (not per file) for an estimated date, showing the context you already
+have: folder name, photo count, cameras found, the year range of neighbouring folders. Offer
+"I don't know" as a valid answer — a folder without a date is a legitimate result. Done when
+every such folder has an answer.
+
+## Step 6 — Write the report
+
+Write in `$OUT/`:
+
+- **`report.json`** — structured, English keys, for another step or skill to consume.
+- **`report.md`** — readable, in the user's language, for deciding. Per folder: what is there,
+  date range, cameras, what is wrong, formats to look at, and the **suggested action** (not
+  executed).
+
+Close with one sentence: how many files, how many without a reliable date, how many at-risk
+formats, and the concrete next step. Done when both files are written and the sentence is said.
+
+Scope: inspect and report only. Verification history: `evals/`.
