@@ -1,5 +1,6 @@
-# Code benchmark tasks: 12 agentic tasks (write / fix / feature) in Python, React TSX,
-# Swift, C++, Rust and shell. Each task has setup_<t> (fixture), P_<t> (prompt) and
+# Code benchmark tasks: 12 agentic tasks in Python, React TSX, Swift, C++, Rust and shell.
+# All edit existing code: one careful rename with a trap (py), five features (tsx, swift,
+# cpp_feat, rust_feat, sh_feat) and six bug fixes (cpp and the *_bug tasks). Each task has setup_<t> (fixture), P_<t> (prompt) and
 # check_<t> (compiles and runs the result, checks nothing else changed; prints 1 or 0).
 # Sourced by bin/bench-model and selftest.sh. Fixtures and prompts are the measured
 # instruments: changing them breaks comparison with earlier results.

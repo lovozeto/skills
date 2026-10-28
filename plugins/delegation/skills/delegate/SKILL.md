@@ -26,16 +26,22 @@ edit code, read code) or have decided to do the task yourself.
 
 Try in order; a source works when it returns at least one rule, otherwise try the next:
 
-1. `kb` on the PATH: `kb get hardware` (this machine's profile) and
-   `kb search "<task class>" --base delegation` (routing and model rules).
-2. `$KB_ROOT/INDEX.md`: open the `hardware` and `delegation/routing.md` entries it lists.
+1. `kb` on the PATH: `kb search "<task class>" --base delegation` (routing and model rules).
+2. `$KB_ROOT/INDEX.md`: open the `delegation/routing.md` entry it lists.
 3. Neither: **generic mode**. Tell the user once: "no delegation knowledge base: model
    choice is unmeasured, so I will check the result more closely."
+
+Find this machine's profile on its own, first that exists: `kb get hardware`,
+`$KB_ROOT/hardware.md`, `~/.config/delegation/hardware.md`. Use it only when its
+`machine_uuid` matches the `UUID` that `delegation-machine-info` prints; otherwise treat the
+machine as unprofiled.
 
 From the profile read `delegation_local` and `opencode`:
 - `delegation_local: not-configured` → this machine runs no local models: skip every
   `ollama` route.
-- No profile → say "machine not profiled" and use what `ollama list` shows.
+- No profile → say "machine not profiled: the user can run `/delegation:init`" and use what
+  `ollama list` shows.
+- `text_model` and `agent_model` → the defaults for `ask-local` and for local agents.
 - `opencode: not-allowed` or `not-installed` → skip every `ask-opencode` route.
 
 Done when you know which source you are using (or generic mode) and which routes this

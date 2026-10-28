@@ -28,8 +28,11 @@ emails, phone numbers, keys, or data files.
 | `bin/bench-model` | Measures a model on 12 code tasks and 3 text tasks; compares with earlier runs |
 | `delegate` skill | Decides whether and where to delegate, then verifies the result |
 | `write-for-model` skill | Builds the prompt for the target model with `prompt-master` |
+| `/delegation:init` | Sets a Mac up: Ollama, opencode, models with a pinned context, measurements, machine profile; or re-evaluates newer models (`--reevaluate`) |
 | `/delegation:benchmark-model` | Runs `bench-model` on demand and proposes knowledge updates |
-| Hooks | SessionStart: reports missing dependencies. PreToolUse: blocks disallowed models, asks before `--unsafe` |
+| `model-scout` agent | Finds newer models that fit the machine for one role (sonnet, read-only) |
+| `bin/delegation-*`, `bin/sync-ollama-to-opencode` | init's helpers: detect the machine, pull one model with its context pinned, server environment, remove Ollama, register models in opencode |
+| Hooks | SessionStart: reports missing dependencies. PreToolUse: blocks disallowed models; asks before `--unsafe` and before removing models or Ollama |
 
 ## Requirements
 
@@ -40,8 +43,8 @@ emails, phone numbers, keys, or data files.
 | opencode | agents for file work | `brew install opencode` |
 | `prompt-master` skill | `write-for-model` writes prompts with it | `npx skills add nidhinjs/prompt-master -g -y -a claude-code` |
 
-Nothing is installed for you. Each route works on its own: without opencode, text tasks
-still go to Ollama.
+`/delegation:init` installs Ollama and opencode, each after your yes; nothing else installs
+anything.
 
 ## Knowledge
 
@@ -58,18 +61,15 @@ is unmeasured and check results more closely. Measure your models with
 | `ASK_LOCAL_MODEL` | default model for `ask-local` |
 | `ASK_OPENCODE_MODEL` | default model for `ask-opencode` |
 | `OLLAMA_HOST_URL`, `OLLAMA_KEEP_ALIVE` | Ollama server and idle unload time |
-| `DELEGATION_BENCH_DIR` | where benchmark results live |
+| `DELEGATION_BENCH_DIR` | where benchmark results live (one folder per machine) |
+| `DELEGATION_BENCH_TASKS` | another task set with the plugin's `bench/` layout |
+| `DELEGATION_PROFILE_DIR` | folder of machine profiles `init` writes to (default `~/.config/delegation/hardware.md`) |
 | `KB_ROOT` | knowledge base root when `kb` is not on the PATH |
 
 ## Platforms
 
 macOS. Linux is planned: `ask-local` starts Ollama only through the macOS app today.
 
-## Planned
-
-- `/delegation:init`: provisions a machine (Ollama, models with a pinned context window,
-  opencode registration), records the machine profile, and re-evaluates newer models
-  against the benchmark.
 
 ## Tests
 

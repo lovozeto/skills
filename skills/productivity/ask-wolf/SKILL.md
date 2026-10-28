@@ -52,6 +52,7 @@ its own; **manual** means the user types it.
 |---|---|---|
 | A big, low-reasoning task (summarize, extract, convert, mechanical refactor) | `/delegation:delegate` (plugin `delegation`) | auto |
 | Writing the prompt for a delegated model | `/delegation:write-for-model` | auto |
+| Setting a Mac up for local models, or checking for better ones | `/delegation:init` | manual |
 | Measuring a model before routing to it | `/delegation:benchmark-model` | manual |
 
 ## Thinking and learning

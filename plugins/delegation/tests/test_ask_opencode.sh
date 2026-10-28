@@ -45,4 +45,7 @@ rm "$T/repo/src/.env.local"; touch "$T/repo/src/guests.sqlite3"
 out="$("$AO" --model ollama/devstral-small-2:24b --dir "$T/repo" "Email ana.perez@gmail.com" 2>&1)"; rc=$?
 expect_eq "local model skips the data check" "$rc" 0
 "$AO" --model >/dev/null 2>&1; expect_eq "--model without value -> exit 2" "$?" 2
+expect_contains "text mode: no bash" "$("$AO" --model ollama/qwen3:14b "x" 2>&1)" "bash=False"
+mkdir -p "$T/clean"; expect_contains "cloud agent: no bash" "$("$AO" --model opencode/beam-free --dir "$T/clean" "x" 2>&1)" "bash=False"
+expect_contains "local agent keeps bash" "$("$AO" --model ollama/qwen3:14b --dir "$T/repo" "x" 2>&1)" "bash=True"
 finish

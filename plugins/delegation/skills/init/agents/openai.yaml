@@ -1,0 +1,5 @@
+interface:
+  display_name: "Delegation Init"
+  short_description: "Set up a Mac for local delegation or re-evaluate newer models"
+policy:
+  allow_implicit_invocation: false

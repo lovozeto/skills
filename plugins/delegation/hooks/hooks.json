@@ -1,5 +1,5 @@
 {
-  "description": "delegation guardrails. SessionStart is a sensor: silent unless a dependency is missing, then it names the install command. PreToolUse on Bash gates ask-opencode: denies models outside opencode/*-free, google/gemini-*-flash* and ollama/*, and asks the user before --unsafe.",
+  "description": "delegation guardrails. SessionStart is a sensor: silent unless a dependency is missing, then it names the install command. PreToolUse on Bash gates ask-opencode: denies models outside opencode/*-free, google/gemini-*-flash* and ollama/*, and asks the user before --unsafe and before removing models or Ollama.",
   "hooks": {
     "SessionStart": [
       {
@@ -13,7 +13,7 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard_cloud.py\"", "timeout": 10 }
+          { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard_delegation.py\"", "timeout": 10 }
         ]
       }
     ]

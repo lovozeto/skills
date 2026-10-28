@@ -14,6 +14,9 @@
 #     with an empty working folder instead.
 #   - The `lean` agent (short prompt; no web, todo, task or skill tools) sends ~3,500 input
 #     tokens instead of ~11,600 for opencode's default agent. `--full` uses the default agent.
+#   - bash is off in text mode and for every cloud model: opencode confines its file tools to
+#     the working folder, but bash could read anything on the machine. Local models editing
+#     a repo keep bash.
 #
 # Policy, enforced here so it holds for every caller:
 #   - Allowed models: opencode/*-free, google/gemini-*-flash* (free tier), ollama/*.
@@ -153,8 +156,9 @@ mkdir -p "$SANDBOX/config/opencode" "$SANDBOX/work"
 ERR_TMP="$SANDBOX/stderr"
 # Carry over only the `provider` section of the user's config (e.g. local Ollama models), so
 # custom providers still resolve while instructions and agents stay out; add the lean agent.
-python3 - "$HOME/.config/opencode/opencode.json" "$SANDBOX/config/opencode/opencode.json" <<'PY' 2>/dev/null || true
-import json, sys
+BASH_TOOL=0; [[ "$CLOUD" == 0 && -n "$DIR" ]] && BASH_TOOL=1
+BASH_TOOL="$BASH_TOOL" python3 - "$HOME/.config/opencode/opencode.json" "$SANDBOX/config/opencode/opencode.json" <<'PY' 2>/dev/null || true
+import json, os, sys
 try:
     with open(sys.argv[1]) as f:
         providers = json.load(f).get("provider", {})
@@ -168,6 +172,8 @@ lean = {
     "tools": {name: False for name in
               ("webfetch", "websearch", "todowrite", "todoread", "task", "skill")},
 }
+if os.environ.get("BASH_TOOL") != "1":
+    lean["tools"]["bash"] = False
 with open(sys.argv[2], "w") as f:
     json.dump({"$schema": "https://opencode.ai/config.json", "provider": providers,
                "permission": {"skill": {"*": "deny"}}, "agent": {"lean": lean}}, f)

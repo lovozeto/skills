@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake ollama CLI: logs every call to $FAKE_LOG; `list` prints names from $FAKE_LIST.
+echo "ollama $*" >> "$FAKE_LOG"
+case "$1" in
+  list) printf 'NAME ID SIZE MODIFIED\n'; for n in ${FAKE_LIST:-}; do echo "$n x 1GB now"; done ;;
+  show) printf 'FROM /blobs/abc\nPARAMETER num_ctx 4096\nPARAMETER stop "<|im_end|>"\n' ;;
+  create) cp "$4" "$FAKE_LOG.modelfile" ;;
+  pull|rm|stop) ;;
+esac

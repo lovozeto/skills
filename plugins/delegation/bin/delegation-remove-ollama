@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# delegation-remove-ollama — take Ollama off this Mac as if it had never been installed, for
+# when /delegation:init decides to use only opencode's models.
+#
+# Usage:
+#   delegation-remove-ollama           list what would be removed (changes nothing)
+#   delegation-remove-ollama --apply   remove it
+#
+# --apply, in order: quit Ollama; uninstall the app with brew (cask ollama-app or formula
+# ollama, whichever is installed); remove the server LaunchAgent and its variables; drop
+# provider.ollama from opencode's config; MOVE the models (~/.ollama), the app bundle if
+# brew did not remove it, and every Ollama folder found in ~/Library to
+# ~/.Trash/ollama-removed-<date>/. Nothing is deleted for good: the user empties the Trash.
+# $OLLAMA_APP overrides the app path (default /Applications/Ollama.app).
+
+set -uo pipefail
+
+SELF_DIR="$(cd "$(dirname "$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}")")" && pwd)"
+APP="${OLLAMA_APP:-/Applications/Ollama.app}"
+BIN="$HOME/.Trash/ollama-removed-$(date +%F)"
+
+leftovers() {
+  [[ -e "$HOME/.ollama" ]] && echo "$HOME/.ollama"
+  [[ -e "$APP" ]] && echo "$APP"
+  find "$HOME/Library" -mindepth 1 -maxdepth 2 -iname '*ollama*' -not -path "$HOME/Library/LaunchAgents/*" 2>/dev/null
+}
+
+if [[ "${1:-}" != "--apply" ]]; then
+  echo "Would quit Ollama, uninstall it with brew, remove its LaunchAgent and opencode provider, and move to $BIN:"
+  leftovers | while IFS= read -r p; do echo "  $(du -sh "$p" 2>/dev/null | cut -f1)	$p"; done
+  exit 0
+fi
+
+osascript -e 'quit app "Ollama"' >/dev/null 2>&1 || true
+pkill -x ollama >/dev/null 2>&1 || true
+if command -v brew >/dev/null; then
+  brew list --cask ollama-app >/dev/null 2>&1 && brew uninstall --cask ollama-app
+  brew list ollama >/dev/null 2>&1 && brew uninstall ollama
+fi
+"$SELF_DIR/delegation-ollama-env" remove
+"$SELF_DIR/sync-ollama-to-opencode" --remove
+
+mkdir -p "$BIN"
+leftovers | while IFS= read -r p; do
+  rel="${p#"$HOME"/}"; [[ "$rel" == "$p" ]] && rel="$(basename "$p")"
+  mkdir -p "$BIN/$(dirname "$rel")"
+  mv "$p" "$BIN/$rel" && echo "Moved to Trash: $p"
+done
+echo "Ollama removed. Its files are in $BIN until you empty the Trash." >&2

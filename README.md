@@ -53,7 +53,7 @@ This repository is also a plugin marketplace (`.claude-plugin/marketplace.json`)
 | Plugin | What it does |
 |---|---|
 | `skill-forge` | Guided wizard to design and build agents, skills, and plugins: zero-hole definition, complexity-based type decision, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, mandatory model per agent, and an HTML approval view. Supersedes `/workshop-skill`. |
-| `delegation` | Hand token-heavy, low-reasoning tasks to free models: text to local Ollama (`ask-local`), file work to an opencode agent, local when the material has data. Data scan before cloud calls, model allowlist, benchmark (`/delegation:benchmark-model`). Supersedes `/delegate`, `/write-for-model`, `/benchmark-model`. |
+| `delegation` | Hand token-heavy, low-reasoning tasks to free models: text to local Ollama (`ask-local`), file work to an opencode agent, local when the material has data. Data scan before cloud calls, model allowlist, benchmark (`/delegation:benchmark-model`), machine setup (`/delegation:init`). Supersedes `/delegate`, `/write-for-model`, `/benchmark-model`. |
 
 ```bash
 /plugin marketplace add lovozeto/skills

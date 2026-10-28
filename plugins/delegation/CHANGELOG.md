@@ -18,4 +18,16 @@ follow semver (patch = fix, minor = new capability, major = breaking).
   `benchmark-model` (user-invoked).
 - Hooks: SessionStart dependency sensor; PreToolUse guard on `ask-opencode` models and
   `--unsafe`.
+- `/delegation:init`: sets a Mac up (installs Ollama and opencode, server LaunchAgent, models
+  from the user's catalog with a pinned `num_ctx`, opencode registration, fit and code
+  measurements, machine profile) or re-evaluates newer models found by the `model-scout`
+  agent (sonnet) against the current ones; can remove Ollama entirely (files to the Trash)
+  when the machine goes cloud-only.
+- Helpers: `delegation-machine-info`, `delegation-pull-model`, `delegation-ollama-env`,
+  `delegation-remove-ollama`, `sync-ollama-to-opencode`.
+- `bench-model`: fit probe (100% GPU, no hidden reasoning), `--runs`, and a replace decision
+  against the current model (`--current`, `--class`).
+- `ask-local` refuses a prompt larger than the model's `num_ctx` instead of letting Ollama
+  cut it, prints Ollama's own errors, and exits 2 on bad arguments. `ask-opencode` turns bash
+  off in text mode and for cloud models.
 - Replaces the standalone `delegate`, `write-for-model` and `benchmark-model` skills.

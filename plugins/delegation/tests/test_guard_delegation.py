@@ -4,7 +4,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-HOOK = Path(__file__).resolve().parent.parent / "hooks" / "guard_cloud.py"
+HOOK = Path(__file__).resolve().parent.parent / "hooks" / "guard_delegation.py"
 
 
 def decide(command, tool="Bash"):
@@ -29,6 +29,13 @@ class Guard(unittest.TestCase):
 
     def test_env_model_is_checked(self):
         self.assertEqual(decide("ASK_OPENCODE_MODEL=openai/gpt-6 ask-opencode 'x'"), "deny")
+
+    def test_removing_models_or_ollama_asks_the_user(self):
+        for cmd in ("ollama rm qwen3:14b", "brew uninstall --cask ollama-app", "delegation-remove-ollama --apply"):
+            self.assertEqual(decide(cmd), "ask", cmd)
+
+    def test_listing_what_would_be_removed_passes(self):
+        self.assertIsNone(decide("delegation-remove-ollama"))
 
     def test_unsafe_asks_the_user(self):
         self.assertEqual(decide("ask-opencode --model ollama/qwen3:14b --dir . --unsafe 'x'"), "ask")

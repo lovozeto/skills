@@ -3,6 +3,8 @@
 set -uo pipefail
 D="$(cd "$(dirname "$0")" && pwd)"; rc=0
 for t in "$D"/test_*.sh; do bash "$t" || rc=1; done
-for t in "$D"/test_*.py; do python3 "$t" 2>&1 | tail -1 | sed "s|^|$(basename "$t"): |"; python3 "$t" >/dev/null 2>&1 || rc=1; done
+for t in "$D"/test_*.py; do
+  if out="$(python3 -W ignore "$t" 2>&1)"; then echo "$(basename "$t"): OK"; else echo "$out" | tail -5; rc=1; fi
+done
 bash "$D/../bench/code/selftest.sh" >/dev/null && echo "bench selftest: ok" || { echo "bench selftest: FAILED"; rc=1; }
 exit $rc

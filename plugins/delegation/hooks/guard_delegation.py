@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""PreToolUse guard for delegation calls (a gate, not a sensor).
+"""PreToolUse guard for delegation (a gate, not a sensor).
 
+For a Bash command that removes local models or Ollama (`ollama rm`, `brew uninstall`,
+`delegation-remove-ollama --apply`): ask the user; downloading them again costs gigabytes.
 For a Bash command that runs ask-opencode:
   - deny a model outside opencode/*-free, google/gemini-*-flash* (free tier) and ollama/*:
     no pay-per-use models;
@@ -30,6 +32,10 @@ def main():
     if event.get("tool_name") != "Bash":
         return
     command = (event.get("tool_input") or {}).get("command") or ""
+    if re.search(r"\bollama\s+rm\b|\bbrew\s+uninstall\b|delegation-remove-ollama\s+--apply", command):
+        decision("ask", "This removes local models or Ollama itself; getting them back means "
+                 "downloading gigabytes again. Allow it only if the user agreed to this removal.")
+        return
     if "ask-opencode" not in command:
         return
     models = re.findall(r"--model[= ]+['\"]?([^\s'\"]+)", command)
