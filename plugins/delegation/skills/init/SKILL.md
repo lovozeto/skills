@@ -37,7 +37,7 @@ profile (Paths). Then:
 - profile `delegation_local: configured` (with or without `--reevaluate`) → **Re-evaluate**.
 
 **Agent roles** (code agent, fast agent) run their benchmark through opencode: they apply
-only when the verdict allows agents and `opencode: allowed`. Otherwise drop them everywhere
+only when the verdict allows agents and `opencode: allowed` (in Setup, known after step 2). Otherwise drop them everywhere
 below and skip `sync-ollama-to-opencode`.
 
 Done when the mode is chosen and the machine facts are in hand.
