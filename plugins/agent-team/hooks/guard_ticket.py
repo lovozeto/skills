@@ -30,9 +30,13 @@ from _shell import agent_name, block, load_config, read_payload, run, simple_com
 
 APPROVED = "ready-for-agent"
 STAGES = {"planned", "building", "qa", "done"}
-FIELD = re.compile(r"^\*{0,2}(Stage|QA|VQA):\*{0,2}[ \t]*(.*?)[ \t]*$", re.M)
+# A header field in any markdown form: `**QA:** x`, `QA: x`, `- Stage: x`, indented.
+FIELD = re.compile(r"^[ \t]*(?:[-*+>][ \t]+)?\*{0,2}(Stage|QA|VQA)\*{0,2}:\*{0,2}[ \t]*(.*?)[ \t]*$", re.M | re.I)
 VERDICT_OWNERS = {"QA": "qa", "VQA": "vqa"}
-READ_ONLY = {"cat", "head", "tail", "less", "grep", "rg", "wc", "ls", "diff", "stat", "file", "echo", "nl", "sort", "uniq"}
+READ_ONLY = {"cat", "head", "tail", "less", "grep", "rg", "wc", "ls", "diff", "stat", "file", "echo", "nl", "uniq"}
+INTERPRETERS = {"python", "python3", "node", "perl", "ruby", "deno", "bun"}
+GH_FLAGS_WITH_VALUE = {"-R", "--repo", "--hostname"}
+SED_WRITE = re.compile(r"(^|[;}\s/])w\s")  # sed's `w file` command writes a file
 
 
 def is_ticket(path):
@@ -49,8 +53,14 @@ def header(text):
 def fields(text):
     found = {}
     for name, value in FIELD.findall(header(text)):
-        found.setdefault(name, value)
+        found.setdefault(name.upper() if name.lower() != "stage" else "Stage", value)
     return found
+
+
+def duplicated(text):
+    """Header fields written more than once: the gate reads one, so a second is a way around it."""
+    names = [name.lower() for name, _ in FIELD.findall(header(text))]
+    return sorted({name for name in names if names.count(name) > 1})
 
 
 def normalized(value):
@@ -88,9 +98,29 @@ def edits_in_place(words):
                for w in words[1:])
 
 
+def gh_args(words):
+    """gh's arguments with its global flags (`-R owner/repo`) dropped."""
+    args, skip = [], False
+    for word in words[1:]:
+        if skip:
+            skip = False
+        elif word in GH_FLAGS_WITH_VALUE:
+            skip = True
+        elif not any(word.startswith(flag + "=") for flag in GH_FLAGS_WITH_VALUE):
+            args.append(word)
+    return args
+
+
 def adds_approval(words):
-    """`gh issue edit … --add-label …ready-for-agent…` or `gh issue create … --label …`."""
-    if len(words) < 3 or os.path.basename(words[0]) != "gh" or words[1] != "issue":
+    """`gh issue edit … --add-label …ready-for-agent…`, `gh issue create … --label …`, or a
+    `gh api` call that names the label."""
+    if not words or os.path.basename(words[0]) != "gh":
+        return False
+    args = gh_args(words)
+    if args[:1] == ["api"]:
+        return any(APPROVED in word for word in args)
+    words = ["gh"] + args
+    if len(words) < 3 or words[1] != "issue":
         return False
     flags = {"edit": ("--add-label",), "create": ("--label", "-l")}.get(words[2], ())
     for index, word in enumerate(words):
@@ -109,21 +139,42 @@ def is_done(path):
         return False
 
 
+def holds_open_ticket(path):
+    """A folder (`rm -r .scratch`) that holds a working file not yet at Stage: done."""
+    if not os.path.isdir(path):
+        return False
+    for folder, _, names in os.walk(path):
+        for name in names:
+            ticket = os.path.join(folder, name)
+            if is_ticket(ticket) and not is_done(ticket):
+                return True
+    return False
+
+
 def check_bash(command, cwd):
     for words in simple_commands(command) or []:
         if adds_approval(words):
             ask(f"Approve this ticket? Adding the {APPROVED} label lets run-task start it.")
-        if words[0] in READ_ONLY or os.path.basename(words[0]) in ("git", "gh"):
+        name = os.path.basename(words[0])
+        if words[0] in READ_ONLY or name in ("git", "gh"):
             continue
+        if name in INTERPRETERS and any(".scratch" in word.lower() for word in words[1:]):
+            block("Blocked: change tickets with the Edit or Write tool, so the ticket gate can check "
+                  "the change (a script that names .scratch/ could write one).")
         paths = [w for w in words[1:] if not w.startswith("-")]
         if (words[0] == "mv" and len(paths) == 2 and all(is_ticket(os.path.join(cwd, p)) for p in paths)
                 and os.path.basename(paths[0]).startswith("draft-") and not os.path.exists(os.path.join(cwd, paths[1]))):
             continue  # renaming a draft to its issue number keeps its content
-        if words[0] == "sed" and not edits_in_place(words):
+        if words[0] == "sed" and not edits_in_place(words) and not any(SED_WRITE.search(w) for w in words[1:]):
             continue
         for word in words:
             target = os.path.join(cwd, word)
-            if not word.startswith("-") and is_ticket(target):
+            if word.startswith("-"):
+                continue
+            if words[0] == "rm" and holds_open_ticket(target):
+                block(f"Blocked: {word} holds a ticket still in flight; delete a working file only "
+                      "once it reaches Stage: done.")
+            if is_ticket(target):
                 if words[0] == "rm" and is_done(target):
                     continue
                 block("Blocked: change tickets with the Edit or Write tool, so the ticket "
@@ -140,6 +191,9 @@ def check_edit(tool, tool_input, agent):
     if after_text is None:
         return
     before, after = fields(before_text), fields(after_text)
+    twice = duplicated(after_text)
+    if twice:
+        block(f"Blocked: a ticket header holds each field once ({', '.join(twice)} appears twice).")
 
     for line, owner in VERDICT_OWNERS.items():
         changed = after.get(line) != before.get(line)

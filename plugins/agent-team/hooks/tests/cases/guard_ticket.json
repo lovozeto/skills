@@ -673,6 +673,141 @@
         }
       },
       "expect": "block"
+    },
+    {
+      "name": "a heredoc redirected into a ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "cat <<EOF > {dir:plain}/.scratch/issues/4-t.md\n**QA:** PASS\nEOF"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a heredoc read by a command passes",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "cat <<EOF\nhello\nEOF"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "gh with a repo flag adding ready-for-agent asks",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh -R lovozeto/x issue edit 3 --add-label ready-for-agent"
+        }
+      },
+      "expect": "ask"
+    },
+    {
+      "name": "gh api adding ready-for-agent asks",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh api repos/o/r/issues/3/labels -f 'labels[]=ready-for-agent'"
+        }
+      },
+      "expect": "ask"
+    },
+    {
+      "name": "sort -o into a ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "sort -o {dir:plain}/.scratch/issues/4-t.md x.txt"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "eval writing a ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "eval \"echo x > {dir:plain}/.scratch/issues/4-t.md\""
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a script that names .scratch is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "python3 -c \"open('.scratch/issues/4-t.md','w')\""
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "sed writing a ticket with w is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "sed -n 'w {dir:plain}/.scratch/issues/4-t.md' x.txt"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "removing a folder with an open ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm -rf {dir:plain}/.scratch"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a second QA line is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/issues/4-t.md",
+          "old_string": "**VQA:** n/a",
+          "new_string": "**VQA:** n/a\nQA: PASS \u2014 x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a list-style Stage done without QA PASS is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/4-t.md": "# T\n\n**Issue:** #4\n**Stage:** building\n**QA:** pending\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/issues/4-t.md",
+          "old_string": "**Stage:** building",
+          "new_string": "- Stage: done"
+        }
+      },
+      "expect": "block"
     }
   ]
 }

@@ -13,6 +13,7 @@ Exit 2 blocks with the stderr reason; an unreadable payload or an internal error
 import os
 import re
 import sys
+from collections import Counter
 
 sys.dont_write_bytecode = True  # no __pycache__ inside the plugin
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -26,9 +27,11 @@ def glob_regex(pattern):
 
 
 def in_scope(relative, globs):
-    """Inside when a glob matches and no `!` glob (an exclusion) does."""
-    excluded = [g[1:] for g in globs if g.startswith("!")]
-    included = [g for g in globs if not g.startswith("!")]
+    """Inside when a glob matches and no `!` glob (an exclusion) does. Letter case is ignored:
+    macOS file names are case-insensitive, so `app/API/x.ts` is `app/api/x.ts`."""
+    relative = relative.lower()
+    excluded = [g[1:].lower() for g in globs if g.startswith("!")]
+    included = [g.lower() for g in globs if not g.startswith("!")]
     return (any(glob_regex(g).match(relative) for g in included)
             and not any(glob_regex(g).match(relative) for g in excluded))
 
@@ -54,24 +57,32 @@ def check():
         block(f"Blocked: {agent} may only write {allowed}; "
               f"{relative} is outside its scope. Return the change to the orchestrator instead.")
     if agent == "reference-scout":
-        check_proposals_only(payload.get("tool_name"), tool_input)
+        check_proposals_only(payload.get("tool_name"), tool_input, os.path.join(root, path))
 
 
 STATUS = re.compile(r"^\s*-?\s*\*{0,2}Status:\*{0,2}\s*(.*?)\s*$", re.MULTILINE | re.IGNORECASE)
 
 
-def check_proposals_only(tool, tool_input):
-    """reference-scout may only add `proposed` entries: every status in the old text must
-    survive unchanged, and any new status must be `proposed`. Writing the whole file is off."""
+def check_proposals_only(tool, tool_input, path):
+    """reference-scout may only add `proposed` entries. The edit is applied to the board on disk
+    and the statuses of the whole file compared: none may disappear or change, and every new
+    one must be `proposed`. Writing the whole file is off."""
     if tool != "Edit":
         block("Blocked: reference-scout adds entries to the reference board with Edit only.")
-    remaining = STATUS.findall(tool_input.get("new_string") or "")
-    for status in STATUS.findall(tool_input.get("old_string") or ""):
-        if status not in remaining:
-            block("Blocked: reference-scout may not change an existing status on the reference board; "
-                  "approving and rejecting are the owners' call.")
-        remaining.remove(status)
-    if any(status.lower() != "proposed" for status in remaining):
+    try:
+        before = open(path, encoding="utf-8").read()
+    except OSError:
+        before = ""
+    old, new = tool_input.get("old_string") or "", tool_input.get("new_string") or ""
+    if not old or old not in before:
+        return  # the edit cannot apply, so it changes nothing
+    after = before.replace(old, new) if tool_input.get("replace_all") else before.replace(old, new, 1)
+    was = Counter(s.lower() for s in STATUS.findall(before))
+    now = Counter(s.lower() for s in STATUS.findall(after))
+    if was - now:
+        block("Blocked: reference-scout may not change an existing status on the reference board; "
+              "approving and rejecting are the owners' call.")
+    if any(status != "proposed" for status in now - was):
         block("Blocked: reference-scout may only add entries with Status: proposed.")
 
 

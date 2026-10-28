@@ -1,7 +1,7 @@
 ---
 name: memory-keeper
 description: "Single task: close one ticket that passed its quality gate and record it in the project's state and decision files. Dispatched by run-task. Does not judge or change the work."
-tools: Read, Grep, Glob, Edit
+tools: Read, Grep, Glob, Edit, Write
 model: haiku
 ---
 

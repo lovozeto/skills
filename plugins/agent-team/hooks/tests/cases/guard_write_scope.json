@@ -758,6 +758,9 @@
           "old_string": "## Entries\n",
           "new_string": "## Entries\n\n### R-001 \u2014 x\n- **URL:** https://e.x\n- **Status:** proposed\n"
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n"
       }
     },
     {
@@ -771,6 +774,9 @@
           "old_string": "- **Status:** approved\n",
           "new_string": "- **Status:** approved\n\n### R-002 \u2014 y\n- **Status:** proposed\n"
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n- **Status:** approved\n\n"
       }
     },
     {
@@ -784,6 +790,9 @@
           "old_string": "## Entries\n",
           "new_string": "## Entries\n\n### R-001 \u2014 x\n- **Status:** approved\n"
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n"
       }
     },
     {
@@ -797,6 +806,9 @@
           "old_string": "- **Status:** proposed",
           "new_string": "- **Status:** approved"
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n- **Status:** proposed\n"
       }
     },
     {
@@ -810,6 +822,9 @@
           "old_string": "**Status:** proposed",
           "new_string": "**Status:** rejected"
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n**Status:** proposed\n"
       }
     },
     {
@@ -823,6 +838,9 @@
           "old_string": "### R-001 \u2014 x\n- **Status:** approved\n",
           "new_string": ""
         }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n### R-001 \u2014 x\n- **Status:** approved\n\n"
       }
     },
     {
@@ -931,6 +949,34 @@
         }
       },
       "expect": "allow"
+    },
+    {
+      "name": "reference-scout changing only the status word is blocked",
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n### R-001 \u2014 x\n- **Status:** proposed\n"
+      },
+      "payload": {
+        "agent_type": "agent-team:reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "proposed",
+          "new_string": "approved"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "frontend writing a differently cased excluded path is blocked",
+      "payload": {
+        "agent_type": "frontend",
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/app/API/x.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
     }
   ]
 }

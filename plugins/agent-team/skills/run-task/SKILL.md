@@ -36,7 +36,7 @@ You are the **orchestrator**. The agents do the work, one task each; you hold th
    **Brief**
    - Every agent: the ticket path, the branch, the global KB root as an absolute path (`$CLAUDE_KB_DIR`, or `~/dev/claude-kb` expanded), the scope bullets tagged with its name, and the results it depends on from `## Log`. Absolute paths. Before dispatching an agent with a `knowledge` entry in `.claude/agent-team.json`, check that `kb stale --json` runs and the entry maps at least one file; when either fails, add to its brief: "Your knowledge files are not available: say the KB does not cover a topic instead of answering from memory", and log that. (The launch hook's note arrives after the brief is sent, so it cannot be relied on for this.)
    - A project-local agent: also what its `## Project` entry asks for.
-   - Build agents, once a `PLAN` exists: also their `FILES` lines, their `ORDER` steps and the `TO VERIFY` lines they own. `frontend` also gets the UI-library recipe when one exists.
+   - Build agents, once a `PLAN` exists: also their `FILES` lines and their `ORDER` steps. `backend` also gets the `TO VERIFY` lines; `qa` gets the rest, since `frontend` and `web-graphics` have no shell. `frontend` also gets the UI-library recipe when one exists.
    - `content`: mode `write` on its first run; mode `review` after delegation, with the source copy and the drafts (none when delegation was skipped).
    - `qa`: set `**Stage:** qa` first; brief it with the ticket path and the base from the `Branch:` line.
    - `vqa`: after `qa`, when UI changed; brief it with the ticket path, the routes (from the PLAN's `FILES` or the scope bullets, as URL paths), and the UI-library recipe and `UI DECISIONS` from the log. A `vqa` that returns `OUT OF SCOPE: no running preview` stops the run until the owner fixes the launch configuration or starts the server.
@@ -54,18 +54,18 @@ You are the **orchestrator**. The agents do the work, one task each; you hold th
    - `NEEDS BACKEND`: show it to the owner. With their go-ahead: add `backend` to `Agents:` before `frontend` if it is missing, add the item as a `- [backend] …` bullet, dispatch backend, then dispatch frontend again with backend's `API FOR FRONTEND`; each run gets its own `### <agent>` log entry.
 
    **Stops**
-   - Before dispatching `brand` (a new or a resumed run): when `.claude/knowledge/brand/reference-board.md` has any `Status: proposed` entry for this ticket, show those entries to the owner and stop; dispatch `brand` once every entry for this ticket is `approved` or `rejected`.
+   - Before dispatching `brand` (a new or a resumed run): when `.claude/knowledge/brand/reference-board.md` has any `Status: proposed` entry whose `Ticket:` is this issue, show those entries to the owner and stop; dispatch `brand` once every entry for this ticket is `approved` or `rejected`.
    - A launch blocked because the agent's knowledge expired: show the owner the hook's message and the refresh it names, and stop. After the owner confirms the refresh, resume at that same agent.
    - `OUT OF SCOPE` or a missing input: show it to the owner and stop.
    - `QA: FAIL`: show the failures, and with the owner's go-ahead send each one to the agent that owns the fix, then run `qa` again.
    - `VQA: FAIL`: show the findings; with the owner's go-ahead send each to the agent that owns the fix (frontend, web-graphics, or ui for a decision), then run `qa` and `vqa` again.
 
    Done when every agent before `memory-keeper` has a log entry (a `content` entry counts only with its `COPY REVIEW` when its copy appears in other languages), `QA: PASS`, and `VQA: PASS` or `n/a`.
-4. **Close.** Dispatch `agent-team:memory-keeper` with the ticket path and the branch, then log its return and post it as an issue comment, as in step 3. A blocked close means a verdict is missing: return to step 3.
+4. **Close.** Dispatch `agent-team:memory-keeper` with the ticket path and the branch, then log its return and post it as an issue comment, as in step 3, and update the issue body with the acceptance criteria it ticked. A blocked close means a verdict is missing: return to step 3.
 5. **Deliver.** Commit on the branch (Conventional Commits, English, ≤ 50 characters). Ask the owner before pushing and before opening the PR; its body says `Closes #<N>`. Once the PR is open: move the issue to In review (track-work) and delete the working file (`rm`; the ticket guard allows it at `Stage: done`): the issue's comments hold the log. Merge only when the owner asks for that merge in chat (global rule); the PR closes the issue, and track-work moves it to Done.
 
 ## Rules
 
 - Running agents in parallel needs the owner's yes first, each time.
 - Every change to the working file reaches the issue in the same step: header and sections through `gh issue edit <N> --body-file <tmp>` (answers, `Agents:` and scope-tag updates, new bullets), `## Log` lines (results, `Decision:` lines, `APPROVED`/`REJECTED`) as an issue comment. Temp files go outside `.scratch/`, written with the Write tool.
-- The record lives in the issue; the working file carries it while in flight. You write `Stage:`, `Branch:` and `## Log`; `QA:` belongs to `qa`, `VQA:` to `vqa`.
+- The record lives in the issue; the working file carries it while in flight. You write `Stage:` (except `done`, which `memory-keeper` sets with the ticked criteria), `Branch:` and `## Log`; `QA:` belongs to `qa`, `VQA:` to `vqa`.

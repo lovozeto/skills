@@ -43,7 +43,9 @@ global hooks of the owner's setup, not here.
 
 - An agent with Bash can still write through the shell; its instructions and the ticket guard
   cover that.
-- A script that edits a working file itself (`python3 -c …`) is not seen by the ticket guard.
+- A script that edits a working file without naming `.scratch` (a path built at run time) is
+  not seen by the ticket guard; one that names it is blocked.
+- `cd` inside a command is not followed: `cd .scratch/issues && echo x > 1.md` passes.
 - The approval label added through `gh api` or the web UI is not seen; `run-task` reads the
   labels before it starts, so the web UI still counts as an approval.
 - `kb stale` names a repo's knowledge after its folder; the hook matches repo refs by the part

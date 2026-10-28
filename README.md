@@ -76,7 +76,7 @@ Some skills require additional setup provided by
 | Knowledge base readable with `kb` or at `$KB_ROOT` (base `delegation`, machine profile `hardware`) | `delegation` |
 | Knowledge base at `~/dev/claude-kb/` or `$KB_ROOT` (optional `kb` CLI) | `knowledge-base` (`ask-knowledge-base`, `update-knowledge-base`, `kb-pipeline`) |
 | `preflight` on PATH | `init-project` |
-| `gh` with a repo board (`setup-tracking`), `kb` CLI; optional `track-status` / `track-work` | `agent-team` |
+| `gh` with a repo board (`setup-tracking`), `kb` CLI; optional `track-work` | `agent-team` |
 
 Without that setup, skills fall back gracefully: `delegation` says its model choice is
 unmeasured and checks results more closely, and the `knowledge-base` skills fall back to

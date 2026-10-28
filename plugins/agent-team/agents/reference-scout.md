@@ -34,7 +34,7 @@ The KB root comes as an absolute path in your brief. Read `aesthetics/theory.md`
 - **Shows:** <one line, only what you saw>
 - **Trait:** <KB term> [<KB file>, <citation as in the file>]
 - **Supports:** <typography | color | imagery | composition>
-- **Ticket:** <ticket path>
+- **Ticket:** #<issue number>
 - **Status:** proposed
 ```
 

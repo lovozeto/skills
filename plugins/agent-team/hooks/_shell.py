@@ -7,14 +7,15 @@ import shlex
 import sys
 
 OPERATOR_CHARS = ";&|()<>"
-# Words that end a simple command. "$" is what shlex leaves of "$(".
+# Words that end a simple command: a newline, and "$", which is what shlex leaves of "$(".
 SEPARATORS = {"\n", "$"}
 WRAPPERS = {"env", "command", "builtin", "exec", "nohup", "time", "sudo", "xargs"}
 # Shell keywords that can sit in front of a command (`then git commit`, `do cat x`).
 KEYWORDS = {"if", "then", "else", "elif", "do", "while", "until", "!", "{", "}"}
 SHELLS = {"sh", "bash", "zsh"}
 ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
-HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1[^\n]*\n.*?\n\s*\2\s*(?=\n|$)", re.S)
+# The rest of the `<<EOF` line (a redirection, a pipe) is kept; only the body is dropped.
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1([^\n]*)\n.*?\n\s*\2\s*(?=\n|$)", re.S)
 
 
 def run(check):
@@ -42,7 +43,7 @@ def block(reason):
 
 def tokens(command):
     """Shell words and operators, heredoc bodies removed. None if quoting is broken."""
-    command = HEREDOC.sub("<<HEREDOC\n", command)
+    command = HEREDOC.sub(lambda m: "<<HEREDOC" + m.group(3) + "\n", command)
     lexer = shlex.shlex(command, posix=True, punctuation_chars=OPERATOR_CHARS + "\n")
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True
@@ -78,6 +79,8 @@ def _unwrap(words):
         words = words[1:]
         while wrapper and words and words[0].startswith("-"):
             words = words[1:]  # the wrapper's own flags (env -i, time -p)
+    if words and words[0] == "eval":
+        return simple_commands(" ".join(words[1:])) or []
     if len(words) >= 3 and words[0].rsplit("/", 1)[-1] in SHELLS and "-c" in words:
         position = words.index("-c") + 1
         return (simple_commands(words[position]) or []) if position < len(words) else []
