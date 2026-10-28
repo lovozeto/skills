@@ -32,9 +32,10 @@ If `repo` is missing, return `OUT OF SCOPE: no repo path`. If `base` is missing,
      dependency lists, command `--help`);
    - **stale**: names a path, file, command, or rule the changes removed or renamed;
    - **a no-op**: an instruction the model follows by default, or one that changes nothing;
-   - **a duplicate**: already said by `~/.claude/CLAUDE.md`, by a KB entry listed in
-     `~/dev/claude-kb/INDEX.md` whose line covers the same fact (open the entry only when the
-     INDEX line is ambiguous), or by any file this `CLAUDE.md` points to (one home per fact).
+   - **a duplicate**: already said by `~/.claude/CLAUDE.md`, by a KB rule found with
+     `kb search "<the line's topic, in English>"` that covers the same fact (`kb get` the
+     section only when the hit is ambiguous; if `kb` is missing or exits non-zero, use
+     `${KB_ROOT:-~/dev/claude-kb}/INDEX.md` and open only the matching entry), or by any file this `CLAUDE.md` points to (one home per fact).
    A line stays when it is a pointer to a doc, an unwritten convention, the reason behind a
    decision, a gotcha, or a gate. Done when every line has a keep / cut / update verdict.
 4. Add only what is needed: a pointer to a new doc found in the changes (spec, `GLOSSARY.md`,
