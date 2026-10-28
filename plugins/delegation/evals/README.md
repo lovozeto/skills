@@ -42,3 +42,22 @@ Same method, loaded with `--plugin-dir` so the edited copy replaces the installe
 log, file or transcript that is not attached: haiku tries to read it (denied tools, turn
 limit reached) before selecting a skill. These measure the harness as much as the
 description; a fairer next step is positives that paste the text inline and 3 runs per query.
+
+## Inline-text positives, 3 runs per query
+
+Positives that referred to an unattached log/file now paste a short sample inline, and every
+query ran 3 times (30 trials per skill). A/B: OLD = `main` description, NEW = this branch.
+
+| Skill | Description | Positives | Negatives |
+|---|---|---|---|
+| delegate | OLD | 8/30 | 30/30 |
+| delegate | NEW | 10/30 | 30/30 |
+| write-for-model | OLD | 22/30 | 30/30 |
+| write-for-model | NEW | 28/30 | 30/30 |
+
+`write-for-model` has the same description in both arms, and still moved 22 -> 28: run-to-run
+noise is about +-6 trials, so the `delegate` gain (8 -> 10) is not evidence. Pasting the text
+did not help: haiku just does a short summarize/extract/rewrite itself instead of selecting
+`delegate`, which is arguably correct for a 5-line sample (the skill itself says small tasks
+cost more to coordinate than to do). Positives with genuinely long inputs cannot be put in a
+query, so this method cannot tell whether `delegate` under-triggers on real long inputs.

@@ -20,7 +20,7 @@
     "should_trigger": true
   },
   {
-    "query": "The local model keeps asking questions instead of answering. Rewrite my prompt for it",
+    "query": "The local model keeps asking questions instead of answering. Rewrite my prompt for it: 'Please look at the text below and maybe summarize it if you can. Text: ...'",
     "should_trigger": true
   },
   {

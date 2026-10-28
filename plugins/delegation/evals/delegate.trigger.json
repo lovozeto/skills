@@ -1,6 +1,6 @@
 [
   {
-    "query": "Summarize this 4,000-line build log and give me only the failing steps",
+    "query": "Summarize this long build log and give me only the failing steps:\n[0001] step build-1 ok\\n[0002] step build-2 ok\\n[0003] step build-3 ok\\n[0004] step build-4 ok\\n[0005] step build-5 ok\\n[0006] step build-6 ok\\n[0007] step build-7 ok\\n[0008] step build-8 ok\\n[0009] step build-9 ok\\n[0010] step build-10 ok\\n[0011] step build-11 ok\\n[0012] step build-12 ok\\n[0013] step build-13 ok\\n[0014] step build-14 ok\\n[0015] step build-15 ok\\n[0016] step build-16 ok\\n[0017] step build-17 ok\\n[0018] step build-18 ok\\n[0019] step build-19 ok\\n[0020] step build-20 ok\\n[0021] step build-21 ok\\n[0022] step build-22 ok\\n[0023] step build-23 ok\\n[0024] step build-24 ok\\n[0025] step build-25 ok\\n[0026] step build-26 ok\\n[0027] step build-27 ok\\n[0028] step build-28 ok\\n[0029] step build-29 ok\\n[0030] step build-30 ok\\n[0031] step build-31 ok\\n[0032] step build-32 ok\\n[0033] step build-33 ok\\n[0034] step build-34 ok\\n[0035] step build-35 ok\\n[0036] step build-36 ok\\n[0037] step build-37 ok\\n[0038] step build-38 ok\\n[0039] step build-39 ok\\n[0040] step build-40 ok",
     "should_trigger": true
   },
   {
@@ -12,19 +12,19 @@
     "should_trigger": true
   },
   {
-    "query": "Rewrite all these changelog entries in a neutral tone, there are about 200 of them",
+    "query": "Rewrite all these changelog entries in a neutral tone, there are about 200 of them. First ones:\n- Finally fixed that awful crash on startup!!\n- Killer new dark mode, you'll love it\n- Ripped out the garbage legacy exporter",
     "should_trigger": true
   },
   {
-    "query": "I need boilerplate getters and setters for 40 classes, don't spend my tokens on it",
+    "query": "I need boilerplate getters and setters for 40 classes like this one, don't spend my tokens on it:\nclass User { String name; int age; String email; }",
     "should_trigger": true
   },
   {
-    "query": "Extract every email subject and date from this long mailbox export",
+    "query": "Extract every email subject and date from this long mailbox export:\nFrom: a@x.com\nSubject: Invoice 12\nDate: 2026-01-03\n\nFrom: b@y.com\nSubject: Re: Lunch\nDate: 2026-01-05\n\nFrom: c@z.com\nSubject: Trip\nDate: 2026-02-01",
     "should_trigger": true
   },
   {
-    "query": "Read this 3,000-line legacy file and tell me what each function does, use something local",
+    "query": "Read this long legacy file and tell me what each function does, use something local:\ndef a(x):\n    return [i*2 for i in x if i%3==0]\ndef b(p):\n    return open(p).read().split('\\n')\ndef c(d):\n    return {k:v for k,v in d.items() if v}",
     "should_trigger": true
   },
   {
@@ -36,7 +36,7 @@
     "should_trigger": true
   },
   {
-    "query": "Use ollama to summarize the attached meeting transcript",
+    "query": "Use ollama to summarize this meeting transcript:\nAna: We ship Friday. Luis: QA found two blockers. Ana: Fix them Thursday. Luis: Docs still missing. Ana: Marta owns docs. Marta: Done by Wednesday.",
     "should_trigger": true
   },
   {
