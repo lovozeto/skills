@@ -39,6 +39,7 @@ npx skills add lovozeto/skills -g -y
 | `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
 | `/track-work` | Keep the GitHub issue and its board column current while you work |
 | `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
+| `/workspace-layout` | Map of `~/GitHub`: where to clone a repo and how to move one without breaking things |
 
 ### Media
 

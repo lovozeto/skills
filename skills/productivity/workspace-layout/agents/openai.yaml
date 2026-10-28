@@ -1,0 +1,3 @@
+interface:
+  display_name: "Workspace Layout"
+  short_description: "Map of ~/GitHub: where to clone a repo and how to move one safely"
