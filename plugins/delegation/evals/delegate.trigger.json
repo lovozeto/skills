@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Summarize this 4,000-line build log and give me only the failing steps",
+    "should_trigger": true
+  },
+  {
+    "query": "Delegate the translation of these 30 README files to a local model",
+    "should_trigger": true
+  },
+  {
+    "query": "Use a free model to convert this 2 MB CSV schema description into JSON",
+    "should_trigger": true
+  },
+  {
+    "query": "Rewrite all these changelog entries in a neutral tone, there are about 200 of them",
+    "should_trigger": true
+  },
+  {
+    "query": "I need boilerplate getters and setters for 40 classes, don't spend my tokens on it",
+    "should_trigger": true
+  },
+  {
+    "query": "Extract every email subject and date from this long mailbox export",
+    "should_trigger": true
+  },
+  {
+    "query": "Read this 3,000-line legacy file and tell me what each function does, use something local",
+    "should_trigger": true
+  },
+  {
+    "query": "Pásale a un modelo local la traducción de estos 50 archivos de docs al inglés",
+    "should_trigger": true
+  },
+  {
+    "query": "Rename the variable foo to bar across 80 files, mechanical edit, use a free cloud model",
+    "should_trigger": true
+  },
+  {
+    "query": "Use ollama to summarize the attached meeting transcript",
+    "should_trigger": true
+  },
+  {
+    "query": "Design the architecture for a multi-tenant billing service",
+    "should_trigger": false
+  },
+  {
+    "query": "Search the web for the latest release notes of Next.js",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix this off-by-one bug in my pagination function",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this PR for security problems",
+    "should_trigger": false
+  },
+  {
+    "query": "What does git rebase --onto do?",
+    "should_trigger": false
+  },
+  {
+    "query": "Translate 'good morning' to French",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a unit test for this small helper function",
+    "should_trigger": false
+  },
+  {
+    "query": "Decide whether we should use Postgres or DynamoDB for this project",
+    "should_trigger": false
+  },
+  {
+    "query": "Install ollama and pull the llama3 model",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a skill for formatting commit messages",
+    "should_trigger": false
+  }
+]

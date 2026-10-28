@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Write a prompt for qwen2.5 on ollama that extracts action items from meeting notes",
+    "should_trigger": true
+  },
+  {
+    "query": "Build the prompt I should send to the local model before delegating this summary",
+    "should_trigger": true
+  },
+  {
+    "query": "Make a prompt tuned for the opencode agent to rename a function across the repo",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm about to delegate a translation to a free cloud model; draft the prompt for it",
+    "should_trigger": true
+  },
+  {
+    "query": "Redacta un prompt para el modelo local que convierta este log en JSON",
+    "should_trigger": true
+  },
+  {
+    "query": "The local model keeps asking questions instead of answering. Rewrite my prompt for it",
+    "should_trigger": true
+  },
+  {
+    "query": "Prepare the delegation prompt for llama3.2 with the JSON schema constraint",
+    "should_trigger": true
+  },
+  {
+    "query": "Give me a prompt for a small Ollama model that keeps its edits inside one file",
+    "should_trigger": true
+  },
+  {
+    "query": "Tune this prompt for a free opencode cloud model before I run ask-opencode",
+    "should_trigger": true
+  },
+  {
+    "query": "Before the delegated call, write the instruction text for gemma to classify these tickets",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a prompt for Midjourney of a foggy harbor at dawn",
+    "should_trigger": false
+  },
+  {
+    "query": "Improve my system prompt for a Claude customer-support agent",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a README for this plugin",
+    "should_trigger": false
+  },
+  {
+    "query": "Summarize this 4,000-line log",
+    "should_trigger": false
+  },
+  {
+    "query": "Benchmark which local model is fastest on this machine",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a Cursor prompt to scaffold a React app",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain how prompt caching works in the Claude API",
+    "should_trigger": false
+  },
+  {
+    "query": "Edit the SKILL.md description of my plugin to be shorter",
+    "should_trigger": false
+  },
+  {
+    "query": "Which Ollama models fit in 16 GB of RAM?",
+    "should_trigger": false
+  },
+  {
+    "query": "Draft an email to my landlord about the leak",
+    "should_trigger": false
+  }
+]
