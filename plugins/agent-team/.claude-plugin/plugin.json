@@ -1,0 +1,8 @@
+{
+  "name": "agent-team",
+  "version": "0.1.0",
+  "description": "Run a repo's work as tracked tickets through a team of single-task agents: run-task orchestrates, pm drafts each ticket as a GitHub issue, and plan, design, build and quality agents work one at a time behind gates. Hooks keep each agent in its write scope, gate ticket stages and verdicts, ask the owner before the ready-for-agent label, and block agents whose mapped knowledge kb stale lists. Active only in repos with .claude/agent-team.json.",
+  "author": {
+    "name": "lovozeto"
+  }
+}

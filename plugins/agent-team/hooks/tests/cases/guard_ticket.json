@@ -1,0 +1,678 @@
+{
+  "hook": "guard_ticket.py",
+  "cases": [
+    {
+      "name": "closing with QA PASS and VQA n/a passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 lint, types, build ok\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "closing with QA PASS and VQA PASS passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** PASS \u2014 3 widths ok\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "closing with QA pending is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "closing with QA FAIL is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** FAIL \u2014 build breaks\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "closing with QA PASS but VQA pending is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** pending\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "writing a closed ticket without a QA line is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-new.md",
+          "content": "# 02\n\n**Status:** ready-for-agent\n**Stage:** done\n"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "writing a new unapproved ticket passes",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-new.md",
+          "content": "# 01: Toy\n\n**Status:** needs-triage\n**Stage:** planned\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "moving an approved ticket to building passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** planned\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** planned",
+          "new_string": "**Stage:** building"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "qa writing its verdict passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**QA:** pending",
+          "new_string": "**QA:** PASS \u2014 lint, types, build ok"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "the main session writing a QA verdict is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**QA:** pending",
+          "new_string": "**QA:** PASS \u2014 trust me"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "another agent writing a VQA verdict is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** pending\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**VQA:** pending",
+          "new_string": "**VQA:** PASS"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "an edit whose old text is not in the file passes (it will fail anyway)",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "not there",
+          "new_string": "**Stage:** done"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "a non-ticket file that says Stage done passes",
+      "files": {
+        "{dir:plain}/docs/notes.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/docs/notes.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "qa changing anything besides its verdict is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**QA:** pending\n**VQA:** n/a\n\n## Scope\n- x",
+          "new_string": "**QA:** PASS \u2014 ok\n**VQA:** n/a\n\n## Scope\n- y"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "qa closing the ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "the main session switching VQA to n/a is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** pending\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**VQA:** pending",
+          "new_string": "**VQA:** n/a"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "the main session resetting QA to pending is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** FAIL \u2014 lint\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**QA:** FAIL \u2014 lint",
+          "new_string": "**QA:** pending"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "an unknown stage value is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** closed"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "done with trailing text is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done\u2014x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a quoted Stage line under a heading does not count",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/01-toy.md": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** n/a\n\n## Scope\n- x\n\n## Notes\nStage: done\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/01-toy.md",
+          "old_string": "- x",
+          "new_string": "- y"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "a ticket path in other letter case is still guarded",
+      "files": {
+        "{dir:plain}/.SCRATCH/toy/ISSUES/01-toy.MD": "# 01: Toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{dir:plain}/.SCRATCH/toy/ISSUES/01-toy.MD",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "sed on a ticket is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "sed -i '' 's/Stage:** qa/Stage:** done/' .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "redirecting into a ticket is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "echo '**QA:** PASS' >> .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "reading a ticket passes",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "cat .scratch/toy/issues/01-toy.md && grep -n Stage .scratch/*/issues/*.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "staging a ticket in git passes",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "git add .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "git add of a ticket after a heredoc passes",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "python3 - <<'EOF'\nprint(1)\nEOF\n\ngit add .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "printing part of a ticket with sed -n passes",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "sed -n '/## Scope/,/## Out/p' .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "sed --in-place on a ticket is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "sed --in-place 's/a/b/' .scratch/toy/issues/01-toy.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "sort and nl on a ticket pass",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "nl .scratch/toy/issues/01-toy.md | sort"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "reading tickets in a for loop passes",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "for n in 01 02; do sed -n 1,5p .scratch/toy/issues/$n-*.md; done"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "sed -i on a ticket inside a loop is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{dir:plain}",
+        "tool_input": {
+          "command": "for n in 01; do sed -i '' s/a/b/ .scratch/toy/issues/$n-toy.md; done"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "vqa writing its verdict passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/02-vqa.md": "# 02: UI toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** frontend, qa, vqa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** pending\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-vqa.md",
+          "old_string": "**VQA:** pending",
+          "new_string": "**VQA:** PASS \u2014 375/768/1280 light and dark ok"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "vqa writing FAIL passes",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/02-vqa.md": "# 02: UI toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** frontend, qa, vqa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** pending\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-vqa.md",
+          "old_string": "**VQA:** pending",
+          "new_string": "**VQA:** FAIL \u2014 dark caption unreadable"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "vqa changing the QA line is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/02-vqa.md": "# 02: UI toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** frontend, qa, vqa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** pending\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-vqa.md",
+          "old_string": "**QA:** PASS \u2014 ok",
+          "new_string": "**QA:** FAIL \u2014 no"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "vqa closing the ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/02-vqa.md": "# 02: UI toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** frontend, qa, vqa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** PASS \u2014 ok\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-vqa.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "closing a UI ticket with VQA FAIL is blocked",
+      "files": {
+        "{dir:plain}/.scratch/toy/issues/02-vqa.md": "# 02: UI toy\n\n**Status:** ready-for-agent\n**Stage:** qa\n**Agents:** frontend, qa, vqa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** FAIL \u2014 overflow\n\n## Scope\n- x\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "memory-keeper",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/toy/issues/02-vqa.md",
+          "old_string": "**Stage:** qa",
+          "new_string": "**Stage:** done"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a malformed payload passes (fails open)",
+      "stdin": "[]",
+      "expect": "allow"
+    },
+    {
+      "name": "adding the ready-for-agent label asks the owner",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue edit 12 --add-label ready-for-agent --remove-label needs-triage"
+        }
+      },
+      "expect": "ask"
+    },
+    {
+      "name": "adding ready-for-agent in a label list asks the owner",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue edit 12 --add-label=dev,ready-for-agent"
+        }
+      },
+      "expect": "ask"
+    },
+    {
+      "name": "creating an issue already approved asks the owner",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue create --title x --body y -l ready-for-agent"
+        }
+      },
+      "expect": "ask"
+    },
+    {
+      "name": "creating an issue for triage passes",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue create --title x --body-file /tmp/b.md --label dev --label needs-triage"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "removing the ready-for-agent label passes",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue edit 12 --remove-label ready-for-agent"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "posting the log from the working file passes",
+      "files": {
+        "{dir:plain}/.scratch/issues/1-toy.md": "# Toy\n\n**Issue:** #1\n**Stage:** done\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh issue comment 1 --body-file {dir:plain}/.scratch/issues/1-toy.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "deleting a closed working file passes",
+      "files": {
+        "{dir:plain}/.scratch/issues/1-toy.md": "# Toy\n\n**Issue:** #1\n**Stage:** done\n**Agents:** qa, memory-keeper\n**QA:** PASS \u2014 ok\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm {dir:plain}/.scratch/issues/1-toy.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "deleting an in-flight working file is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/2-toy.md": "# Toy\n\n**Issue:** #1\n**Stage:** building\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm {dir:plain}/.scratch/issues/2-toy.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a repo without agent-team.json is not touched",
+      "project": "{repo:feature}",
+      "payload": {
+        "tool_name": "Bash",
+        "cwd": "{repo:feature}",
+        "tool_input": {
+          "command": "gh issue edit 1 --add-label ready-for-agent"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "a plugin-prefixed qa may write the verdict",
+      "files": {
+        "{dir:plain}/.scratch/issues/3-toy.md": "# Toy\n\n**Issue:** #1\n**Stage:** qa\n**Agents:** qa, memory-keeper\n**QA:** pending\n**VQA:** n/a\n\nBody.\n"
+      },
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "agent-team:qa",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/issues/3-toy.md",
+          "old_string": "**QA:** pending",
+          "new_string": "**QA:** PASS \u2014 ok"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "renaming a draft to its issue number passes",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "mv {dir:plain}/.scratch/issues/draft-x.md {dir:plain}/.scratch/issues/7-x.md"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "moving a working file out of the tracker is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "mv {dir:plain}/.scratch/issues/7-x.md {dir:plain}/elsewhere.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "moving a draft onto an existing ticket is blocked",
+      "files": {
+        "{dir:plain}/.scratch/issues/8-y.md": "# T\n\n**Issue:** #8\n**Stage:** qa\n**QA:** PASS \u2014 ok\n**VQA:** n/a\n"
+      },
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "mv {dir:plain}/.scratch/issues/draft-y.md {dir:plain}/.scratch/issues/8-y.md"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "moving a numbered ticket onto another name is blocked",
+      "payload": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "mv {dir:plain}/.scratch/issues/8-y.md {dir:plain}/.scratch/issues/9-y.md"
+        }
+      },
+      "expect": "block"
+    }
+  ]
+}
