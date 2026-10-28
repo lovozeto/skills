@@ -1,7 +1,7 @@
 ---
 name: <SKILL_NAME>
 description: <WHAT_IT_DOES_AND_WHEN_TO_TRIGGER — front-load the trigger word, one trigger per branch, say when NOT to use; keep "when to use" out of the body>
-model: <haiku|sonnet|opus|inherit>   # MANDATORY: orchestrator tier from agent-building/model-catalog (kb get)
+model: <haiku|sonnet|opus|inherit>   # MANDATORY: orchestrator tier from agent-building/model-catalog.md
 allowed-tools: <Read, Write, Edit, Bash, Task, ...>
 ---
 
