@@ -6,8 +6,8 @@ description: "Keep the GitHub issue and its Projects board column current while 
 # track-work
 
 The board must show, at any moment, what is being done and what is next. Rules and `gh`
-commands: `~/dev/claude-kb/agent-skills/issue-tracker.md` → "Keeping the board current"
-(read that section only). Move columns with `track-status <owner/repo> <n> "<column>"`.
+commands: `kb get agent-skills/issue-tracker#keeping-the-board-current` (fallback when `kb` is
+missing or exits non-zero: that section of `${KB_ROOT:-~/dev/claude-kb}/agent-skills/issue-tracker.md`). Move columns with `track-status <owner/repo> <n> "<column>"`.
 
 ## Steps
 
