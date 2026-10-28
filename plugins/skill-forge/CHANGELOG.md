@@ -5,6 +5,10 @@ follow semver (patch = fix, minor = new capability, major = breaking).
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-10-28
+### Fixed
+- `forge-wizard` publish step no longer restates the commit format or the old "startup exception: everything to main": it follows the user's own conventions, never commits straight to `main`, and merges only when the user asks.
+
 ## [0.3.0] — 2026-10-22
 ### Added
 - **Companion skills from `mattpocock-skills`** (soft dependency, built-in fallback):

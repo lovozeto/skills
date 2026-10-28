@@ -17,16 +17,10 @@ Effective skill — you trigger it, not Claude automatically.
 3. `git add` the files for this commit and `git commit -m "<message>"`.
 4. Confirm what was committed and with what message.
 
-## Format — Conventional Commits
+## Format
 
-- **`type: summary`**
-- **`type`** ∈ `feat` · `fix` · `docs` · `refactor` · `chore` · `test`
-- **Summary:** English, imperative mood, **≤ 50 characters**, no trailing period.
-  Example: `fix: guard window access behind Platform.OS`
-- **Body (optional):** only if it adds something — what and why, in English, ~72-char lines.
+Follow the user's commit conventions; their `CLAUDE.md` points to them (in this setup,
+`CONVENTIONS.md` → "Commits", the only home of the format). With no conventions, use
+Conventional Commits: `type: summary`, English, imperative, ≤ 50 characters.
 
-## Hard rules
-
-- Ask before starting a new change whether it goes on a new branch or the existing one.
-- Commit messages go in **English**.
-- Never merge directly to `main` when working with branches — use a PR on GitHub.
+Branch, PR and merge rules are not this skill's job: they live in the same conventions.
