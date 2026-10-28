@@ -26,3 +26,19 @@ Misses for `write-for-model`: "Build the prompt I should send to the local model
 delegating this summary" and "The local model keeps asking questions... rewrite my prompt".
 
 No description was changed. Treat these as a baseline for tuning the `delegate` description.
+
+## After the `delegate` description change
+
+Description widened to name the task classes (summarize, extract, rewrite, translate,
+convert, read long text/logs/exports, mechanical edits across many files) and "use ollama".
+Same method, loaded with `--plugin-dir` so the edited copy replaces the installed one.
+
+| Skill | Pass | Positives | Negatives |
+|---|---|---|---|
+| delegate | 14/20 | 4/10 | 10/10 |
+| write-for-model | 18/20 | 8/10 | 10/10 |
+
++1 on one run per query is within noise. The remaining misses are queries that mention a
+log, file or transcript that is not attached: haiku tries to read it (denied tools, turn
+limit reached) before selecting a skill. These measure the harness as much as the
+description; a fairer next step is positives that paste the text inline and 3 runs per query.
