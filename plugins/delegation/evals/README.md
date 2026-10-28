@@ -3,61 +3,37 @@
 Level-1 trigger sets for the `delegate` and `write-for-model` skills: a flat array of
 `{query, should_trigger}`, 10 positives and 10 close-neighbour negatives each.
 
-## How they were measured
+## Run
 
-The skills are installed globally, so `run_eval` would report 0 triggers. Measured by hand:
-`claude -p "<query>" --model haiku --output-format stream-json --verbose --max-turns 2
---allowedTools Skill`, run from an empty directory, one run per query. A trigger is a `Skill`
-tool_use naming the skill. `--append-system-prompt` told the model not to ask for the
-session objective (the user's CLAUDE.md session rule otherwise answers first and nothing is
-selected).
+```bash
+python3 run_triggers.py <plugin-dir> <label> <model> [runs-per-query]
+```
 
-## Results (2026-10-28, haiku, 1 run per query)
+The skills are installed globally, so skill-creator's `run_eval` reports 0 triggers; this
+script measures selection by hand instead. For each query it runs `claude -p` with
+`--plugin-dir <plugin-dir>` (that copy replaces the installed plugin), `--max-turns 3`,
+`Skill` and `Read` allowed, in `workdir/`, where `make_fixtures.py` writes the long files
+the queries name (a 4,000-line log, a 1,500-message mailbox, 30 docs, 40 classes...). A
+trigger is a `Skill` tool_use naming the skill. A run that does not end in a `result` event
+is retried once, then counted as invalid, never as a miss. `--append-system-prompt` only
+says not to ask for the session objective (the user's CLAUDE.md session rule otherwise
+answers first). Raw transcripts land in `raw/` (ignored by git).
 
-| Skill | Pass | Positives | Negatives |
-|---|---|---|---|
-| delegate | 13/20 | 3/10 | 10/10 |
-| write-for-model | 18/20 | 8/10 | 10/10 |
+## Results (2026-10-28, `claude-opus-5-5`, 3 runs per query)
 
-`delegate` misses the "summarize/extract/rewrite this long X" phrasings where no file is
-attached: haiku answers or asks for the content instead of selecting the skill. It does
-select it when the user says "delegate" or names a local/free model with a concrete job.
-Misses for `write-for-model`: "Build the prompt I should send to the local model before
-delegating this summary" and "The local model keeps asking questions... rewrite my prompt".
+| Skill | `delegate` description | Positives | Negatives | Invalid |
+|---|---|---|---|---|
+| delegate | `main` | 26/30 | 30/30 | 0 |
+| delegate | widened (task classes, "use ollama") | 28/30 | 30/30 | 0 |
+| write-for-model | `main` (unchanged) | 28/30 | 30/30 | 0 |
+| write-for-model | `main` (unchanged), fixed query | 30/30 | 30/30 | 0 |
 
-No description was changed. Treat these as a baseline for tuning the `delegate` description.
+The widened `delegate` description gained 2 trials, both on "extract every subject and date
+from mailbox.mbox". With the `main` description Opus did that with `grep` instead, which
+costs no model tokens: the better choice. So the gain is not an improvement and the
+`main` description is kept. The one `write-for-model` miss was a query with no prompt to
+tune; the query now includes one.
 
-## After the `delegate` description change
-
-Description widened to name the task classes (summarize, extract, rewrite, translate,
-convert, read long text/logs/exports, mechanical edits across many files) and "use ollama".
-Same method, loaded with `--plugin-dir` so the edited copy replaces the installed one.
-
-| Skill | Pass | Positives | Negatives |
-|---|---|---|---|
-| delegate | 14/20 | 4/10 | 10/10 |
-| write-for-model | 18/20 | 8/10 | 10/10 |
-
-+1 on one run per query is within noise. The remaining misses are queries that mention a
-log, file or transcript that is not attached: haiku tries to read it (denied tools, turn
-limit reached) before selecting a skill. These measure the harness as much as the
-description; a fairer next step is positives that paste the text inline and 3 runs per query.
-
-## Inline-text positives, 3 runs per query
-
-Positives that referred to an unattached log/file now paste a short sample inline, and every
-query ran 3 times (30 trials per skill). A/B: OLD = `main` description, NEW = this branch.
-
-| Skill | Description | Positives | Negatives |
-|---|---|---|---|
-| delegate | OLD | 8/30 | 30/30 |
-| delegate | NEW | 10/30 | 30/30 |
-| write-for-model | OLD | 22/30 | 30/30 |
-| write-for-model | NEW | 28/30 | 30/30 |
-
-`write-for-model` has the same description in both arms, and still moved 22 -> 28: run-to-run
-noise is about +-6 trials, so the `delegate` gain (8 -> 10) is not evidence. Pasting the text
-did not help: haiku just does a short summarize/extract/rewrite itself instead of selecting
-`delegate`, which is arguably correct for a 5-line sample (the skill itself says small tasks
-cost more to coordinate than to do). Positives with genuinely long inputs cannot be put in a
-query, so this method cannot tell whether `delegate` under-triggers on real long inputs.
+Earlier runs on haiku (pasted text, no fixtures, errored runs counted as misses, A/B in
+parallel) gave 3-10/30 for `delegate` with +-6 trials of noise; they measured the harness,
+not the descriptions, and are superseded.

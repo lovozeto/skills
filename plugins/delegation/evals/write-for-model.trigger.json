@@ -32,7 +32,7 @@
     "should_trigger": true
   },
   {
-    "query": "Tune this prompt for a free opencode cloud model before I run ask-opencode",
+    "query": "Tune this prompt for a free opencode cloud model before I run ask-opencode: 'Go through src/ and fix the style issues you find.'",
     "should_trigger": true
   },
   {

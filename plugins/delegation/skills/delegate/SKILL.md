@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Hand a token-heavy, low-reasoning task to a free local or cloud model instead of spending Claude tokens. Use whenever the request is to summarize, extract from, rewrite, translate, convert or read a long text, log, transcript, export or file, or to make a mechanical or boilerplate code edit across many files, even if the user does not mention delegation; and when the user says "delegate", "use ollama" or "use a free/local model".
+description: Hand a token-heavy, low-reasoning task to a free local or cloud model instead of spending Claude tokens. Use before summarizing or extracting from long text or logs, translating or rewriting prose, converting formats, mechanical code edits or boilerplate, or reading long code; and when the user says "delegate" or "use a free/local model".
 argument-hint: "[task description]"
 ---
 
