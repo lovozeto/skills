@@ -23,3 +23,4 @@ artifact, it moves the old one here instead of deleting it.
 | Archived | Replaced by | When |
 |---|---|---|
 | `skills/engineering/workshop-skill/` | `plugins/skill-forge/` (`/forge-wizard`) | 2026-08-21 |
+| `skills/engineering/delegate/`, `write-for-model/`, `benchmark-model/` | `plugins/delegation/` | 2026-10-28 |

@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# ask-local — run one text task on a local model through Ollama's API.
+# Free, local, private: nothing leaves the machine. One completion, no tools: for tasks that
+# read or edit files use `ask-opencode --model ollama/<id> --dir <repo>`.
+# Calling the API directly sends the model ~150 tokens instead of the ~3,500+ that opencode
+# adds, which makes small models faster and more reliable on text tasks.
+#
+# Usage:
+#   ask-local "Summarize this text: ..."
+#   cat file.py | ask-local --model <id> --system "You are a reviewer" "Find bugs"
+#
+# Prompt: first positional argument, or stdin (pipe).
+# Flags:
+#   --model <id>       name as shown by `ollama list`. Default: $ASK_LOCAL_MODEL, else the
+#                      smallest installed model (fastest, least RAM).
+#   --system <txt>     optional system instruction
+#   --base <url>       Ollama server (default $OLLAMA_HOST_URL or http://127.0.0.1:11434)
+#   --format <f>       `json`, or a JSON schema (inline or @file.json): the reply is forced to
+#                      that shape (Ollama structured outputs)
+#   --think <lvl>      reasoning models only: low | medium | high
+#   --temperature <n>  sampling temperature (default: the model's own)
+#
+# If the default local server is down, it starts Ollama.app (macOS; Linux is planned). Ollama
+# loads the model on demand and unloads it after OLLAMA_KEEP_ALIVE (default 30m) idle.
+#
+# Output: response text only to stdout, exit 0.
+# exit 2 = server down, no model installed, or the request failed: the caller does the task
+# itself or moves one tier up.
+
+set -eo pipefail
+
+DEFAULT_BASE="http://127.0.0.1:11434"
+BASE="${OLLAMA_HOST_URL:-$DEFAULT_BASE}"
+MODEL="${ASK_LOCAL_MODEL:-}"
+SYSTEM=""
+FORMAT=""
+THINK=""
+TEMPERATURE=""
+KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-30m}"
+prompt=""
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --model)  MODEL="$2";  shift 2 ;;
+    --system) SYSTEM="$2"; shift 2 ;;
+    --base)   BASE="$2";   shift 2 ;;
+    --format) FORMAT="$2"; shift 2 ;;
+    --think)  THINK="$2";  shift 2 ;;
+    --temperature) TEMPERATURE="$2"; shift 2 ;;
+    *)        prompt="$1"; shift ;;
+  esac
+done
+
+if [[ -z "$prompt" && ! -t 0 ]]; then
+  prompt="$(cat)"
+fi
+if [[ -z "$prompt" ]]; then
+  echo "ask-local: missing prompt (pass it as an argument or via stdin)." >&2
+  exit 2
+fi
+
+up() { curl -sf --max-time 3 "$BASE/api/version" >/dev/null 2>&1; }
+
+# Start the app only for the default local server; a custom URL is someone else's server.
+if ! up && [[ "$BASE" == "$DEFAULT_BASE" ]] && [[ "$(uname)" == "Darwin" ]]; then
+  open -ga Ollama 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do up && break; sleep 1; done
+fi
+if ! up; then
+  echo "ask-local: Ollama is not responding at $BASE. Install or open it (macOS: brew install --cask ollama-app)." >&2
+  exit 2
+fi
+
+if [[ -z "$MODEL" ]]; then
+  MODEL="$(curl -sf --max-time 10 "$BASE/api/tags" | python3 -c '
+import json, sys
+models = json.load(sys.stdin).get("models", [])
+print(min(models, key=lambda m: m.get("size", 0))["name"] if models else "")' 2>/dev/null || true)"
+  if [[ -z "$MODEL" ]]; then
+    echo "ask-local: no model installed in Ollama (see ollama list)." >&2
+    exit 2
+  fi
+fi
+
+# JSON payload, built with python so escaping is right.
+payload="$(MODEL="$MODEL" SYSTEM="$SYSTEM" PROMPT="$prompt" KEEP_ALIVE="$KEEP_ALIVE" \
+  FORMAT="$FORMAT" THINK="$THINK" TEMPERATURE="$TEMPERATURE" python3 - <<'PY'
+import json, os
+msgs = []
+if os.environ.get("SYSTEM"):
+    msgs.append({"role": "system", "content": os.environ["SYSTEM"]})
+msgs.append({"role": "user", "content": os.environ["PROMPT"]})
+body = {"model": os.environ["MODEL"], "messages": msgs,
+        "keep_alive": os.environ["KEEP_ALIVE"], "stream": False}
+if os.environ.get("TEMPERATURE"):
+    body["options"] = {"temperature": float(os.environ["TEMPERATURE"])}
+fmt = os.environ.get("FORMAT")
+if fmt:
+    if fmt.startswith("@"):
+        with open(fmt[1:]) as f:
+            fmt = f.read()
+    body["format"] = "json" if fmt == "json" else json.loads(fmt)
+if os.environ.get("THINK"):
+    body["think"] = os.environ["THINK"]
+print(json.dumps(body))
+PY
+)"
+
+resp="$(curl -sf --max-time 600 "$BASE/api/chat" \
+  -H 'Content-Type: application/json' -d "$payload")" || {
+  echo "ask-local: the request to Ollama failed (is '$MODEL' in 'ollama list'?)." >&2
+  exit 2
+}
+
+echo "$resp" | python3 -c 'import sys, json; print(json.load(sys.stdin)["message"]["content"])'

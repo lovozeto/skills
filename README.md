@@ -24,14 +24,11 @@ npx skills add lovozeto/skills -g -y
 
 | Skill | What it does |
 |---|---|
-| `/delegate` | Hand token-heavy, low-reasoning tasks to a free opencode model |
 | `/ask-knowledge-base` | Explain a knowledge base rule in plain language |
-| `/write-for-model` | Build an optimized prompt for a specific local or delegation model |
 | `/commit` | Stage and commit following Conventional Commits |
 | `/kb-pipeline` | Research, update, or refresh a knowledge base with mandatory curation gates |
 | `/update-knowledge-base` | Add or correct a single KB entry from a verified source URL |
 | `/arbitrate` | Resolve a clash between UX intent and a verified technical constraint |
-| `/benchmark-model` | Test a local model, measure quality and speed, update the task routing map |
 | `/init-project` | Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md |
 
 ### Productivity
@@ -56,13 +53,15 @@ This repository is also a plugin marketplace (`.claude-plugin/marketplace.json`)
 | Plugin | What it does |
 |---|---|
 | `skill-forge` | Guided wizard to design and build agents, skills, and plugins: zero-hole definition, complexity-based type decision, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, mandatory model per agent, and an HTML approval view. Supersedes `/workshop-skill`. |
+| `delegation` | Hand token-heavy, low-reasoning tasks to free models: text to local Ollama (`ask-local`), file work to an opencode agent, local when the material has data. Data scan before cloud calls, model allowlist, benchmark (`/delegation:benchmark-model`). Supersedes `/delegate`, `/write-for-model`, `/benchmark-model`. |
 
 ```bash
 /plugin marketplace add lovozeto/skills
 /plugin install skill-forge@lovozeto-skills
+/plugin install delegation@lovozeto-skills
 ```
 
-See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md).
+See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md) and [`plugins/delegation/README.md`](plugins/delegation/README.md).
 
 ## Setup
 
@@ -71,13 +70,13 @@ Some skills require additional setup provided by
 
 | Dependency | Used by |
 |---|---|
-| `ask-opencode` wrapper on PATH | `delegate`, `write-for-model` |
-| `hardware.md` in active profile | `delegate`, `skill-forge` |
+| Knowledge base readable with `kb` or at `$KB_ROOT` (base `delegation`, machine profile `hardware`) | `delegation` |
 | Knowledge base at `~/dev/claude-kb/` | `ask-knowledge-base`, `kb-pipeline` |
 | `preflight` on PATH | `init-project` |
 
-Without that setup, skills fall back gracefully — `delegate` uses the Claude
-tier ladder, and `ask-knowledge-base` accepts a custom KB path at invocation time.
+Without that setup, skills fall back gracefully: `delegation` says its model choice is
+unmeasured and checks results more closely, and `ask-knowledge-base` accepts a custom KB path
+at invocation time.
 
 ## Complementary: mattpocock/skills
 

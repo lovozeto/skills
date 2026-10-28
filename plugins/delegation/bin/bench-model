@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# bench-model — measure one model on the delegation benchmark and compare it with every
+# model measured before on this machine.
+#
+# Code: 12 agentic tasks run through `ask-opencode --model <m> --dir <tmp>`; a checker
+#       compiles and runs each result. Tasks whose compiler is missing are skipped.
+# Text: T4 (RSVP → JSON, plain and with a schema) and T5 (warm rewrite) through `ask-local`
+#       (or `ask-opencode` text mode for cloud models). T5 checks objective rules only.
+#
+# Usage:
+#   bench-model <model> [--tasks code|text|all] [--only t1,t2]
+#   <model>: an Ollama name (qwen3:14b or ollama/qwen3:14b), or a free cloud id.
+#
+# Results: one TSV per model in $DELEGATION_BENCH_DIR (default ~/.local/share/delegation/bench),
+# rows: date, model, class, task, seconds, pass|fail|skip, note. Earlier rows stay; the latest
+# row per task counts. T5's rewrite is saved as <model>_T5.txt for a human tone check.
+# One run per task: a guide, not a final verdict.
+# Cloud models only see the benchmark's own fixtures, which hold no real data.
+# Exit: 0 after a run (whatever the scores) · 2 = bad arguments or nothing could run.
+
+set -uo pipefail
+
+SELF="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "${BASH_SOURCE[0]}")"
+ROOT="$(cd "$(dirname "$SELF")/.." && pwd)"
+ASK_LOCAL="${BENCH_ASK_LOCAL:-$ROOT/bin/ask-local}"
+ASK_OPENCODE="${BENCH_ASK_OPENCODE:-$ROOT/bin/ask-opencode}"
+OUT_DIR="${DELEGATION_BENCH_DIR:-$HOME/.local/share/delegation/bench}"
+
+MODEL=""; CLASSES="all"; ONLY=""
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --tasks) CLASSES="$2"; shift 2 ;;
+    --only)  ONLY="$2"; shift 2 ;;
+    -h|--help) sed -n '2,20p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) MODEL="$1"; shift ;;
+  esac
+done
+if [[ -z "$MODEL" || ! "$CLASSES" =~ ^(code|text|all)$ ]]; then
+  echo "bench-model: usage: bench-model <model> [--tasks code|text|all] [--only t1,t2]" >&2
+  exit 2
+fi
+[[ "$MODEL" != */* ]] && MODEL="ollama/$MODEL"
+
+mkdir -p "$OUT_DIR"
+STEM="$OUT_DIR/$(printf '%s' "$MODEL" | tr '/:' '__')"
+OUT="$STEM.tsv"
+TODAY="$(date +%F)"
+row() { printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$TODAY" "$MODEL" "$@" | tee -a "$OUT"; }
+
+TIMEOUT=""
+for t in timeout gtimeout; do command -v "$t" >/dev/null && { TIMEOUT="$t 600"; break; }; done
+
+if [[ "$CLASSES" != text ]]; then
+  # shellcheck source=../bench/code/tasks.sh
+  source "$ROOT/bench/code/tasks.sh"
+  if [[ -n "$ONLY" ]]; then IFS=',' read -r -a TASKS <<< "$ONLY"; else TASKS=("${TASKS_ALL[@]}"); fi
+  WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
+  for t in "${TASKS[@]}"; do
+    [[ -n "$t" ]] || continue
+    if ! declare -F "setup_$t" >/dev/null; then
+      [[ -n "$ONLY" ]] && echo "bench-model: unknown code task '$t'" >&2
+      continue
+    fi
+    missing=""
+    for tool in $(tools_for "$t"); do
+      if [[ "$tool" == tsc ]]; then [[ -n "$TSC" ]] || missing+="tsc "
+      else command -v "$tool" >/dev/null || missing+="$tool "; fi
+    done
+    if [[ -n "$missing" ]]; then row code "$t" 0 skip "missing: ${missing% }"; continue; fi
+    W="$WORK/$t"; mkdir -p "$W"; "setup_$t" "$W"; p="$(eval "printf '%s' \"\$P_$t\"")"
+    s=$(date +%s)
+    # shellcheck disable=SC2086  # TIMEOUT is a command plus its argument, or empty
+    $TIMEOUT "$ASK_OPENCODE" --model "$MODEL" --dir "$W" "$p" >"$W.out" 2>"$W.err"; rc=$?
+    secs=$(( $(date +%s) - s ))
+    if [[ "$("check_$t" "$W" 2>/dev/null)" == 1 ]]; then row code "$t" "$secs" pass ""
+    else row code "$t" "$secs" fail "exit $rc"; fi
+  done
+  [[ "$MODEL" == ollama/* ]] && command -v ollama >/dev/null && ollama stop "${MODEL#ollama/}" >/dev/null 2>&1
+fi
+
+if [[ "$CLASSES" != code && -z "$ONLY" ]]; then
+  python3 "$ROOT/bench/text/tasks.py" run "$MODEL" "$ASK_LOCAL" "$ASK_OPENCODE" "${STEM}_T5.txt" |
+    while IFS=$'\t' read -r task secs result note; do row text "$task" "$secs" "$result" "$note"; done
+fi
+
+echo
+python3 "$ROOT/bench/compare.py" "$OUT_DIR" "$MODEL"
