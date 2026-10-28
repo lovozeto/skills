@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # skill-forge SessionStart sensor (emits context only, never a permission decision).
-# Silent unless a kb/ file has expired: forge-wizard is model-invoked, so its description
-# already tells the agent when to use it. This hook only adds what the description cannot:
-# that the KB the wizard relies on needs a refresh.
+# Silent unless an `agent-building` KB file has expired: forge-wizard is model-invoked, so its
+# description already tells the agent when to use it. This hook only adds what the description
+# cannot: that the KB the wizard relies on needs a refresh. Also silent when `kb` is missing.
 set -uo pipefail
 
-KB="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}/kb"
-TODAY="$(date +%F)"
+command -v kb >/dev/null 2>&1 || exit 0
+
+# `kb stale` prints "<base>/<file> · expired <date>" (or "missing review_by"), one per line.
 expired=()
-while IFS= read -r f; do
-  rb="$(grep -m1 '^review_by:' "$f" 2>/dev/null | awk '{print $2}' | tr -d '"')"
-  [[ -n "$rb" && ! "$rb" > "$TODAY" ]] && expired+=("${f#"$KB"/}")
-done < <(find "$KB" -name '*.md' 2>/dev/null)
+while IFS= read -r line; do
+  [[ "$line" == agent-building/* ]] && expired+=("${line%% *}")
+done < <(kb stale 2>/dev/null)
 
 ((${#expired[@]})) || exit 0
 

@@ -11,7 +11,7 @@ Your one task: run **Level 0** structural verification and report results per fi
 else.
 
 ## Mandatory model
-`sonnet` (native). Equivalence: closest available capable tier from `kb/model-catalog.md`;
+`sonnet` (native). Equivalence: closest available capable tier from `model-catalog.md` in the `agent-building` KB folder your brief names;
 Claude tier ladder as last resort, stated.
 
 ## Procedure

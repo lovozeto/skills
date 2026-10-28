@@ -1,7 +1,7 @@
 ---
 name: <SKILL_NAME>
 description: <WHAT_IT_DOES_AND_WHEN_TO_TRIGGER — front-load the trigger word, one trigger per branch, say when NOT to use; keep "when to use" out of the body>
-model: <haiku|sonnet|opus|inherit>   # MANDATORY: orchestrator tier from kb/model-catalog.md
+model: <haiku|sonnet|opus|inherit>   # MANDATORY: orchestrator tier from agent-building/model-catalog (kb get)
 allowed-tools: <Read, Write, Edit, Bash, Task, ...>
 ---
 
@@ -16,7 +16,7 @@ You are the **master orchestrator**. You hold the decisions and delegate scoped 
 ## Mandatory model
 Orchestrator model: `<tier>` (native) or `<provider/model>` via `<delegation route>`
 (delegated; `tier: advisory|proven`). Equivalence: if unavailable, use the closest available
-from `kb/model-catalog.md`; if none can be verified, fall back to the Claude tier ladder and
+from `kb get agent-building/model-catalog`; if none can be verified, fall back to the Claude tier ladder and
 say so.
 
 ## Subagents (one task each)

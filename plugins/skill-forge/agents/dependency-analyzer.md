@@ -12,7 +12,7 @@ dependency classification. Nothing else.
 
 ## Mandatory model
 `sonnet` (native). Equivalence: if unavailable, use the closest available reasoning-capable
-tier from `kb/model-catalog.md`; if none can be verified, fall back to the Claude tier ladder
+tier from `model-catalog.md` in the `agent-building` KB folder your brief names; if none can be verified, fall back to the Claude tier ladder
 and say so.
 
 ## Output (return exactly this shape)

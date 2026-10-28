@@ -12,8 +12,8 @@ and return them structured. You do not touch other sources and you do not write 
 
 ## Mandatory model
 `sonnet` (native). Reason: judging relevance and noting conflicts in a fetched page needs more
-than haiku. Cross-provider (advisory): Worker (judgment) row in `<plugin_root>/kb/model-catalog.md`
-(path given in your brief). Equivalence: closest available capable tier; Claude tier ladder as
+than haiku. Cross-provider (advisory): Worker (judgment) row in `model-catalog.md` of the KB folder
+named in your brief. Equivalence: closest available capable tier; Claude tier ladder as
 last resort, stated.
 
 ## Procedure

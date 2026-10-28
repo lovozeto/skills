@@ -18,9 +18,11 @@ A guided **wizard** for designing and building Claude Code **agents, skills, and
 | Path | Role |
 |---|---|
 | `skills/forge-wizard/` | The master wizard (orchestrator). Drives the whole flow. |
-| `skills/forge-wizard/agents/agent-prompt-reviewer.md` | Opus reviewer: judges every drafted file as a prompt, against the KB and `writing-for-agents`. |
+| `agents/agent-prompt-reviewer.md` | Opus reviewer: judges every drafted file as a prompt, against the KB and `writing-for-agents`. Spawned as `skill-forge:agent-prompt-reviewer`. |
+| `agents/artifact-verifier.md`, `dependency-analyzer.md`, `flow-view-builder.md` | Sonnet single-task agents: Level 0 structural check, dependency classification, HTML approval view. Spawned as `skill-forge:<name>`. |
+| `agents/source-curator.md`, `template-updater.md` | Single-task agents used by `refresh-forge-kb`. |
 | `skills/refresh-forge-kb/` | On-demand maintainer that refreshes the KB and the packaged templates from credible sources. |
-| `kb/` | Bundled, portable knowledge base (best practices + multi-provider model catalog), the wizard's source of truth. |
+| *(external)* KB base `agent-building` | The wizard's source of truth lives in the global KB, not in this plugin: read it with `kb get agent-building/<file>` (fallback: `${KB_ROOT:-~/dev/claude-kb}/INDEX.md`). Without that KB the wizard says it is unreachable instead of answering from memory. |
 | `assets/templates/` | Reusable scaffolds the wizard instantiates (ledger, plugin.json, hooks.json, preflight, setup, skill/agent, HTML flow view). |
 
 ## Install

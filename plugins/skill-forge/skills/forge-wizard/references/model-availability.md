@@ -10,7 +10,7 @@ in `model:` when the artifact runs under Claude.
 
 ## Cross-provider note (coherence, not detection)
 You are not probing the machine for other providers. You are making the artifact's
-instructions portable: from `kb/model-catalog.md`, add the ChatGPT and OpenCode Zen (and, when
+instructions portable: from `kb get agent-building/model-catalog`, add the ChatGPT and OpenCode Zen (and, when
 relevant, Kimi) equivalents for the chosen role, marked `advisory` until `/refresh-forge-kb`
 verifies the exact ids. Example line in an agent body:
 

@@ -1,5 +1,5 @@
 {
-  "description": "skill-forge guardrails. SessionStart stays silent unless a kb/ file has expired, then asks for /refresh-forge-kb. PreToolUse on Write|Edit|MultiEdit|NotebookEdit is a gate: it asks before a write inside this plugin's kb/. SessionStart is a sensor: it emits context and never returns a permission decision.",
+  "description": "skill-forge guardrails. SessionStart is a sensor: it emits context and never returns a permission decision, and stays silent unless an agent-building KB file has expired (then asks for /refresh-forge-kb) or kb is missing.",
   "hooks": {
     "SessionStart": [
       {
@@ -7,18 +7,6 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session_context.sh\""
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard_kb_writes.py\"",
-            "timeout": 10
           }
         ]
       }
