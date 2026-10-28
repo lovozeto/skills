@@ -5,7 +5,7 @@
     ],
     "qa": [
       ".scratch/**/issues/*.md",
-      ".claude/agent-memory/qa/**"
+      ".claude/agent-memory/agent-team-qa/**"
     ],
     "memory-keeper": [
       ".scratch/**/issues/*.md",
@@ -30,18 +30,18 @@
     "architect": [],
     "porter": [],
     "ux": [
-      ".claude/agent-memory/ux/**"
+      ".claude/agent-memory/agent-team-ux/**"
     ],
     "ui": [
-      ".claude/agent-memory/ui/**"
+      ".claude/agent-memory/agent-team-ui/**"
     ],
     "ui-mui": [
-      ".claude/agent-memory/ui-mui/**"
+      ".claude/agent-memory/agent-team-ui-mui/**"
     ],
     "brand": [
       ".claude/knowledge/brand/**",
       "!.claude/knowledge/brand/reference-board.md",
-      ".claude/agent-memory/brand/**"
+      ".claude/agent-memory/agent-team-brand/**"
     ],
     "content": [],
     "web-graphics": [

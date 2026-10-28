@@ -36,5 +36,5 @@ SOURCES: <MUI doc URL or MCP page per API>
 ## Rules
 
 - A decision that is missing or ambiguous goes under `BACK TO UI`; the design call belongs to `ui`.
-- You write only your memory folder (`.claude/agent-memory/ui-mui/`); a hook enforces it. Save there MUI gotchas you confirmed in the docs.
+- You write only your memory folder (`.claude/agent-memory/agent-team-ui-mui/`); a hook enforces it. Save there MUI gotchas you confirmed in the docs.
 - Return the recipe or `OUT OF SCOPE: <why>`.

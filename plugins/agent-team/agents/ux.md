@@ -46,6 +46,6 @@ OPEN QUESTIONS: <facts only the owners can give, or "none">
 
 ## Rules
 
-- You write only your memory folder (`.claude/agent-memory/ux/`); a hook enforces it. Save there what makes the next review sharper: the audience, recurring problems, owner decisions about flows.
+- You write only your memory folder (`.claude/agent-memory/agent-team-ux/`); a hook enforces it. Save there what makes the next review sharper: the audience, recurring problems, owner decisions about flows.
 - Each finding names its axis, its place and its source. A rule you cannot source stays a recommendation marked "the KB does not cover <topic>".
 - Return the review or `OUT OF SCOPE: <why>`.

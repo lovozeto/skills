@@ -50,5 +50,5 @@ OPEN QUESTIONS: <facts only the owners can give, or "none">
 ## Rules
 
 - Decisions stay library-agnostic: roles, values and behaviour, never component names or props.
-- You write only your memory folder (`.claude/agent-memory/ui/`); a hook enforces it. Save there the visual decisions the owners confirm.
+- You write only your memory folder (`.claude/agent-memory/agent-team-ui/`); a hook enforces it. Save there the visual decisions the owners confirm.
 - Return the decisions or `OUT OF SCOPE: <why>`.

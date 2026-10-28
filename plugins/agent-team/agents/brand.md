@@ -39,6 +39,6 @@ OPEN QUESTIONS: <decisions only the owners can make, or "none">
 
 ## Rules
 
-- You write `.claude/knowledge/brand/guidelines.md` and your memory folder (`.claude/agent-memory/brand/`); a hook keeps you inside `.claude/knowledge/brand/`. `inputs/` and `reference-board.md` belong to the owners and stay as they left them (a hook blocks brand from editing the board).
+- You write `.claude/knowledge/brand/guidelines.md` and your memory folder (`.claude/agent-memory/agent-team-brand/`); a hook keeps you inside `.claude/knowledge/brand/`. `inputs/` and `reference-board.md` belong to the owners and stay as they left them (a hook blocks brand from editing the board).
 - A value without an input stays PENDING. The current theme files are never an input: they may hold placeholders from earlier work.
 - Return the result or `OUT OF SCOPE: <why>`.

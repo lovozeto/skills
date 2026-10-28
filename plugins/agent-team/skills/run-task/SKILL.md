@@ -1,6 +1,6 @@
 ---
 name: run-task
-description: Run work in a repo that has .claude/agent-team.json as a tracked ticket. Use when the owner describes a change to make there (drafts the ticket and opens its GitHub issue for approval) or asks to run, continue or close a ticket. Not for questions, not for repos without .claude/agent-team.json, and not for editing the agent system itself.
+description: "Turns a change request into a tracked ticket and runs the agent team on it. Use first, before reading or editing any code, whenever the owner asks to add, change, fix or remove something (code, copy, UI, data, emails) in a repo whose CLAUDE.md says work runs through run-task or that has .claude/agent-team.json; also when they ask to run, continue or close a ticket. Not for questions about the code, not for repos without .claude/agent-team.json, and not for editing the agent system itself."
 model: opus
 ---
 

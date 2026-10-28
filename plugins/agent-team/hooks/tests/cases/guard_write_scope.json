@@ -162,7 +162,7 @@
       "payload": {
         "tool_name": "Write",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/qa/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-qa/MEMORY.md",
           "content": "x"
         },
         "agent_type": "qa"
@@ -478,7 +478,7 @@
         "tool_name": "Write",
         "agent_type": "ux",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/ux/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-ux/MEMORY.md",
           "content": "x"
         }
       },
@@ -502,7 +502,7 @@
         "tool_name": "Write",
         "agent_type": "ui",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/ui/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-ui/MEMORY.md",
           "content": "x"
         }
       },
@@ -526,7 +526,7 @@
         "tool_name": "Write",
         "agent_type": "ui-mui",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/ui-mui/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-ui-mui/MEMORY.md",
           "content": "x"
         }
       },
@@ -550,7 +550,7 @@
         "tool_name": "Write",
         "agent_type": "ui",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/ux/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-ux/MEMORY.md",
           "content": "x"
         }
       },
@@ -586,7 +586,7 @@
         "tool_name": "Write",
         "agent_type": "brand",
         "tool_input": {
-          "file_path": "{project}/.claude/agent-memory/brand/MEMORY.md",
+          "file_path": "{project}/.claude/agent-memory/agent-team-brand/MEMORY.md",
           "content": "x"
         }
       },
