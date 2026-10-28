@@ -1,0 +1,69 @@
+{
+  "write_scopes": {
+    "pm": [
+      ".scratch/**"
+    ],
+    "qa": [
+      ".scratch/**/issues/*.md",
+      ".claude/agent-memory/agent-team-qa/**"
+    ],
+    "memory-keeper": [
+      ".scratch/**/issues/*.md",
+      "QUICK-STATE.md",
+      "docs/DECISIONS.md"
+    ],
+    "frontend": [
+      "app/**",
+      "!app/api/**",
+      "!**/route.ts",
+      "components/**",
+      "public/**"
+    ],
+    "backend": [
+      "app/api/**",
+      "app/**/route.ts",
+      "lib/**",
+      "scripts/**",
+      "proxy.ts",
+      "vercel.json"
+    ],
+    "architect": [],
+    "porter": [],
+    "ux": [
+      ".claude/agent-memory/agent-team-ux/**"
+    ],
+    "ui": [
+      ".claude/agent-memory/agent-team-ui/**"
+    ],
+    "ui-mui": [
+      ".claude/agent-memory/agent-team-ui-mui/**"
+    ],
+    "brand": [
+      ".claude/knowledge/brand/**",
+      "!.claude/knowledge/brand/reference-board.md",
+      ".claude/agent-memory/agent-team-brand/**"
+    ],
+    "content": [],
+    "web-graphics": [
+      "components/programa/fiesta/**",
+      "components/programa/escenas/**",
+      "components/**/*-canvas.tsx",
+      "components/**/*-scene*.ts",
+      "components/**/*-effects*.tsx",
+      "components/**/*sprites*.ts"
+    ],
+    "vqa": [
+      ".scratch/**/issues/*.md"
+    ],
+    "reference-scout": [
+      ".claude/knowledge/brand/reference-board.md"
+    ]
+  },
+  "knowledge": {
+    "ux": {
+      "kb": [
+        "ux/forms"
+      ]
+    }
+  }
+}

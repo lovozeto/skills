@@ -38,6 +38,12 @@ its own; **manual** means the user types it.
 | skill-forge says its KB expired | `/refresh-forge-kb` | manual |
 | Writing or editing a `CLAUDE.md`, `AGENTS.md`, or skill by hand | `writing-for-agents` (Matt) | auto |
 
+## Running work through the agent team
+
+| Situation | Skill | |
+|---|---|---|
+| Make a change, or run, resume or close a ticket, in a repo with `.claude/agent-team.json` | `/agent-team:run-task` (plugin `agent-team`) | auto |
+
 ## Knowledge base
 
 | Situation | Skill | |

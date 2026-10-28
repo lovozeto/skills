@@ -1,0 +1,982 @@
+{
+  "hook": "guard_write_scope.py",
+  "cases": [
+    {
+      "name": "pm writing a ticket passes",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/issues/01-a.md",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "pm writing a spec in the tracker passes",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/spec.md",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "pm editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/app/page.tsx",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "pm writing QUICK-STATE is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/QUICK-STATE.md",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "pm escaping the tracker with .. is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/.scratch/../app/x.ts",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "pm writing outside the project is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "/tmp/x.md",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "pm editing a notebook outside its scope is blocked",
+      "payload": {
+        "tool_name": "NotebookEdit",
+        "tool_input": {
+          "notebook_path": "{project}/x.ipynb",
+          "content": "x"
+        },
+        "agent_type": "pm"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "memory-keeper editing QUICK-STATE passes",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/QUICK-STATE.md",
+          "content": "x"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "memory-keeper editing DECISIONS passes",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/docs/DECISIONS.md",
+          "content": "x"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "memory-keeper editing a ticket passes",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/issues/02-b.md",
+          "content": "x"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "memory-keeper editing a spec is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/spec.md",
+          "content": "x"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "memory-keeper editing server code is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        },
+        "agent_type": "memory-keeper"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "qa editing a ticket passes",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/issues/01-a.md",
+          "content": "x"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "qa writing its memory passes",
+      "payload": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-qa/MEMORY.md",
+          "content": "x"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "qa editing server code is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        },
+        "agent_type": "qa"
+      },
+      "expect": "block"
+    },
+    {
+      "name": "the main session is not restricted",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "an agent without a scope is not restricted",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        },
+        "agent_type": "Explore"
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "pm writing through a symlink that leaves its scope is blocked",
+      "symlinks": {
+        "{project}/.scratch/link": "{repo:main}"
+      },
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "pm",
+        "tool_input": {
+          "file_path": "{project}/.scratch/link/x.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "pm writing a real tracker file under a test root passes",
+      "project": "{dir:plain}",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "pm",
+        "tool_input": {
+          "file_path": "{dir:plain}/.scratch/y/issues/01.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "frontend editing a component passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "frontend editing a page passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/app/(site)/page.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "frontend editing global styles passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/app/globals.css",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "frontend adding a public image passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/public/img/new.webp",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "frontend editing an API route is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/app/api/rsvp/route.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "frontend editing a route handler outside app/api is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/app/evento.ics/route.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "frontend editing a server lib is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "frontend editing package.json is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "frontend",
+        "tool_input": {
+          "file_path": "{project}/package.json",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "backend editing an API route passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/app/api/rsvp/route.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "backend editing a route handler outside app/api passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/app/admin/auth/route.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "backend editing a server lib passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/lib/rsvp-data.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "backend writing a migration passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/scripts/migrate-004-x.sql",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "backend editing proxy.ts passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/proxy.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "backend editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "backend editing a page is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/app/(site)/page.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "backend editing next.config.ts is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "backend",
+        "tool_input": {
+          "file_path": "{project}/next.config.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "architect writing a plan file is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "architect",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/plan.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "architect editing code is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "architect",
+        "tool_input": {
+          "file_path": "{project}/lib/db.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "porter writing a map file is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "porter",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/port-map.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "porter editing code is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "porter",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ux writing its memory passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "ux",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-ux/MEMORY.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "ux editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "ux",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ui writing its memory passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "ui",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-ui/MEMORY.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "ui editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "ui",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ui-mui writing its memory passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "ui-mui",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-ui-mui/MEMORY.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "ui-mui editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "ui-mui",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ui writing another agent's memory is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "ui",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-ux/MEMORY.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ui-mui editing the theme is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "ui-mui",
+        "tool_input": {
+          "file_path": "{project}/components/site/theme.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "brand writing the guidelines passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "brand",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/guidelines.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "brand writing its memory passes",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "brand",
+        "tool_input": {
+          "file_path": "{project}/.claude/agent-memory/agent-team-brand/MEMORY.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "brand writing outside its home is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "brand",
+        "tool_input": {
+          "file_path": "{project}/.scratch/toy-brand/guidelines.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "brand editing the theme is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "brand",
+        "tool_input": {
+          "file_path": "{project}/components/site/theme.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "ui writing the brand guidelines is blocked",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "ui",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/guidelines.md",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "content writing a dictionary file is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "content",
+        "tool_input": {
+          "file_path": "{project}/components/site/i18n/es.ts"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "web-graphics editing a fiesta graphic passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/programa/fiesta/disco-ball-canvas.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "web-graphics editing a scene file passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/programa/hora-loca-scene-v3.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "web-graphics editing an effects component passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/programa/carnaval-effects.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "web-graphics editing a sprites file passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/programa/escenas/sprites.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "web-graphics editing a site component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "web-graphics editing a programme screen is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/components/programa/pantallas.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "web-graphics editing an API route is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "web-graphics",
+        "tool_input": {
+          "file_path": "{project}/app/api/dj/route.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "vqa editing a ticket passes",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{project}/.scratch/x/issues/01-a.md",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "vqa editing a component is blocked",
+      "payload": {
+        "tool_name": "Edit",
+        "agent_type": "vqa",
+        "tool_input": {
+          "file_path": "{project}/components/site/doodle.tsx",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "reference-scout adding a proposed entry passes",
+      "expect": "allow",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "## Entries\n",
+          "new_string": "## Entries\n\n### R-001 \u2014 x\n- **URL:** https://e.x\n- **Status:** proposed\n"
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n"
+      }
+    },
+    {
+      "name": "reference-scout appending after an approved entry, keeping it, passes",
+      "expect": "allow",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "- **Status:** approved\n",
+          "new_string": "- **Status:** approved\n\n### R-002 \u2014 y\n- **Status:** proposed\n"
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n- **Status:** approved\n\n"
+      }
+    },
+    {
+      "name": "reference-scout adding an approved entry is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "## Entries\n",
+          "new_string": "## Entries\n\n### R-001 \u2014 x\n- **Status:** approved\n"
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n"
+      }
+    },
+    {
+      "name": "reference-scout approving a proposed entry is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "- **Status:** proposed",
+          "new_string": "- **Status:** approved"
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n- **Status:** proposed\n"
+      }
+    },
+    {
+      "name": "reference-scout rejecting a proposed entry is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "**Status:** proposed",
+          "new_string": "**Status:** rejected"
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n**Status:** proposed\n"
+      }
+    },
+    {
+      "name": "reference-scout deleting an approved entry is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "### R-001 \u2014 x\n- **Status:** approved\n",
+          "new_string": ""
+        }
+      },
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n### R-001 \u2014 x\n- **Status:** approved\n\n"
+      }
+    },
+    {
+      "name": "reference-scout rewriting the whole board with Write is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "content": "# Reference board\n"
+        }
+      }
+    },
+    {
+      "name": "reference-scout writing the brand guidelines is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/guidelines.md",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "name": "reference-scout writing an image capture is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-captures/x.png",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "name": "brand editing the reference board is blocked",
+      "expect": "block",
+      "payload": {
+        "agent_type": "brand",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "- **Status:** proposed",
+          "new_string": "- **Status:** approved"
+        }
+      }
+    },
+    {
+      "name": "brand still writing the guidelines passes",
+      "expect": "allow",
+      "payload": {
+        "agent_type": "brand",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/guidelines.md",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "name": "the main session approving a reference passes",
+      "expect": "allow",
+      "payload": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "- **Status:** proposed",
+          "new_string": "- **Status:** approved"
+        }
+      }
+    },
+    {
+      "name": "a malformed payload passes (fails open)",
+      "stdin": "{",
+      "expect": "allow"
+    },
+    {
+      "name": "a plugin-prefixed agent is held to its scope",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "agent-team:pm",
+        "tool_input": {
+          "file_path": "{project}/lib/x.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "a repo without agent-team.json is not touched",
+      "project": "{repo:feature}",
+      "payload": {
+        "tool_name": "Write",
+        "agent_type": "pm",
+        "cwd": "{repo:feature}",
+        "tool_input": {
+          "file_path": "{repo:feature}/lib/x.ts",
+          "content": "x"
+        }
+      },
+      "expect": "allow"
+    },
+    {
+      "name": "reference-scout changing only the status word is blocked",
+      "files": {
+        "{project}/.claude/knowledge/brand/reference-board.md": "# Reference board\n\n## Entries\n\n### R-001 \u2014 x\n- **Status:** proposed\n"
+      },
+      "payload": {
+        "agent_type": "agent-team:reference-scout",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "{project}/.claude/knowledge/brand/reference-board.md",
+          "old_string": "proposed",
+          "new_string": "approved"
+        }
+      },
+      "expect": "block"
+    },
+    {
+      "name": "frontend writing a differently cased excluded path is blocked",
+      "payload": {
+        "agent_type": "frontend",
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "{project}/app/API/x.ts",
+          "content": "x"
+        }
+      },
+      "expect": "block"
+    }
+  ]
+}

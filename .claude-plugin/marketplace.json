@@ -18,6 +18,11 @@
       "name": "knowledge-base",
       "source": "./plugins/knowledge-base",
       "description": "Read, explain, correct, and research the global knowledge base with the kb CLI (INDEX.md fallback), three-gate research pipeline with single-task agents, and a hook that asks before any KB write outside .raw/."
+    },
+    {
+      "name": "agent-team",
+      "source": "./plugins/agent-team",
+      "description": "Run a repo's work as tracked tickets (GitHub issues) through a team of single-task agents: run-task orchestrates plan, design, build and quality agents behind gates; hooks guard write scopes, ticket verdicts, owner approval and knowledge freshness (kb stale). Active only in repos with .claude/agent-team.json."
     }
   ]
 }
