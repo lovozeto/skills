@@ -42,9 +42,9 @@ its own; **manual** means the user types it.
 
 | Situation | Skill | |
 |---|---|---|
-| What does a KB rule mean, and why | `/ask-knowledge-base` | auto |
-| Research a whole topic, or refresh expired KB files | `/kb-pipeline` | auto |
-| Fix or add one KB entry from a known source URL | `/update-knowledge-base` | auto |
+| What does a KB rule mean, and why | `/knowledge-base:ask-knowledge-base` (plugin `knowledge-base`) | auto |
+| Research a whole topic, or refresh expired KB files | `/knowledge-base:kb-pipeline` | manual |
+| Fix or add one KB entry from a known source URL | `/knowledge-base:update-knowledge-base` | auto |
 | A UX intent clashes with a verified technical constraint | `/arbitrate` | manual |
 
 ## Saving tokens

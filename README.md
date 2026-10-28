@@ -24,10 +24,7 @@ npx skills add lovozeto/skills -g -y
 
 | Skill | What it does |
 |---|---|
-| `/ask-knowledge-base` | Explain a knowledge base rule in plain language |
 | `/commit` | Stage and commit following Conventional Commits |
-| `/kb-pipeline` | Research, update, or refresh a knowledge base with mandatory curation gates |
-| `/update-knowledge-base` | Add or correct a single KB entry from a verified source URL |
 | `/arbitrate` | Resolve a clash between UX intent and a verified technical constraint |
 | `/init-project` | Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md |
 
@@ -56,14 +53,16 @@ This repository is also a plugin marketplace (`.claude-plugin/marketplace.json`)
 |---|---|
 | `skill-forge` | Guided wizard to design and build agents, skills, and plugins: zero-hole definition, complexity-based type decision, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, mandatory model per agent, and an HTML approval view. Supersedes `/workshop-skill`. |
 | `delegation` | Hand token-heavy, low-reasoning tasks to free models: text to local Ollama (`ask-local`), file work to an opencode agent, local when the material has data. Data scan before cloud calls, model allowlist, benchmark (`/delegation:benchmark-model`), machine setup (`/delegation:init`). Supersedes `/delegate`, `/write-for-model`, `/benchmark-model`. |
+| `knowledge-base` | Read, explain, correct, and research the global knowledge base with the `kb` CLI (`INDEX.md` fallback): `ask-knowledge-base` and `update-knowledge-base` (automatic), `/knowledge-base:kb-pipeline` (three gates, single-task agents). A hook asks before any write inside the KB outside `.raw/`. Supersedes `/ask-knowledge-base`, `/update-knowledge-base`, `/kb-pipeline`. |
 
 ```bash
 /plugin marketplace add lovozeto/skills
 /plugin install skill-forge@lovozeto-skills
 /plugin install delegation@lovozeto-skills
+/plugin install knowledge-base@lovozeto-skills
 ```
 
-See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md) and [`plugins/delegation/README.md`](plugins/delegation/README.md).
+See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md), [`plugins/delegation/README.md`](plugins/delegation/README.md), and [`plugins/knowledge-base/README.md`](plugins/knowledge-base/README.md).
 
 ## Setup
 
@@ -73,12 +72,12 @@ Some skills require additional setup provided by
 | Dependency | Used by |
 |---|---|
 | Knowledge base readable with `kb` or at `$KB_ROOT` (base `delegation`, machine profile `hardware`) | `delegation` |
-| Knowledge base at `~/dev/claude-kb/` | `ask-knowledge-base`, `kb-pipeline` |
+| Knowledge base at `~/dev/claude-kb/` or `$KB_ROOT` (optional `kb` CLI) | `knowledge-base` (`ask-knowledge-base`, `update-knowledge-base`, `kb-pipeline`) |
 | `preflight` on PATH | `init-project` |
 
 Without that setup, skills fall back gracefully: `delegation` says its model choice is
-unmeasured and checks results more closely, and `ask-knowledge-base` accepts a custom KB path
-at invocation time.
+unmeasured and checks results more closely, and the `knowledge-base` skills fall back to
+`$KB_ROOT/INDEX.md` (default `~/dev/claude-kb/`) when `kb` is unavailable.
 
 ## Complementary: mattpocock/skills
 

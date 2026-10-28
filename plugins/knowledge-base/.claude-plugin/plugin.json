@@ -1,0 +1,8 @@
+{
+  "name": "knowledge-base",
+  "version": "0.1.0",
+  "description": "Read, explain, correct, and research the global knowledge base with the kb CLI (INDEX.md fallback): ask-knowledge-base, update-knowledge-base, and the user-invoked /knowledge-base:kb-pipeline with three gates and single-task agents. A hook asks before any write inside the KB outside .raw/.",
+  "author": {
+    "name": "lovozeto"
+  }
+}
