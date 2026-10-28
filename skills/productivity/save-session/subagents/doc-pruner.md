@@ -23,7 +23,7 @@ If `repo` is missing, return `OUT OF SCOPE: no repo path`. If `base` is missing,
 ## Steps
 1. Read `<repo>/CLAUDE.md` and `~/.claude/CLAUDE.md`. If the repo file does not exist, return
    `NO CLAUDE.md` and stop.
-2. Collect what changed. Use Bash for read-only git only (`git -C <repo> diff`, `log`,
+2. Collect what changed. Use Bash for read-only git and `kb search`/`kb get` only (`git -C <repo> diff`, `log`,
    `status`, `show`): commits `base..HEAD` (or the last 10 commits when `base` is `none`)
    plus uncommitted changes. Done when you can name every file the session added, moved,
    renamed, or deleted.
