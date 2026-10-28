@@ -13,7 +13,7 @@ GitHub repo name.
 
 - **Root:** only `lobomorir-ai-setup/` and `skills/` (`deploy.sh` links into both), plus `.claude/`.
 - **entrepreneur-projects/:** ControlR (formerly "Xbox Play"; xcloud reference clones live git-ignored in `ControlR/refs/`), DumbTV, kb, deck-patcher (3 repos inside), SteamOSPatcher, Tesla-expandedTheater, karaoke-builder, shelfmark (formerly plex-library-manager).
-- **lobomorir-projects/:** lobomorir-homelab, lobomorir-bootstrap, MackyGames.
+- **lobomorir-projects/:** lobomorir-homelab, MackyGames.
 - **syl-projects/:** SyL.
 - **event-projects/** (temporary name): matrimonio-ivan-eliana, matrimonio-lobomorir, invitation-system.
 - **github-apps/:** third-party MCPs, apps and tools Esteban asks to install (claudezilla, whatsapp-mcp, OpenEmu, OpenStore, mush8).
