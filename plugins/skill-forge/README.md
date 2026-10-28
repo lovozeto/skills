@@ -19,7 +19,7 @@ A guided **wizard** for designing and building Claude Code **agents, skills, and
 |---|---|
 | `skills/forge-wizard/` | The master wizard (orchestrator). Drives the whole flow. |
 | `skills/forge-wizard/agents/agent-prompt-reviewer.md` | Opus reviewer: judges every drafted file as a prompt, against the KB and `writing-for-agents`. |
-| `skills/refresh-forge-kb/` | On-demand + schedulable maintainer that refreshes the KB and the packaged templates from credible sources. |
+| `skills/refresh-forge-kb/` | On-demand maintainer that refreshes the KB and the packaged templates from credible sources. |
 | `kb/` | Bundled, portable knowledge base (best practices + multi-provider model catalog), the wizard's source of truth. |
 | `assets/templates/` | Reusable scaffolds the wizard instantiates (ledger, plugin.json, hooks.json, preflight, setup, skill/agent, HTML flow view). |
 

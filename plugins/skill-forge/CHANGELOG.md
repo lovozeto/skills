@@ -5,6 +5,14 @@ follow semver (patch = fix, minor = new capability, major = breaking).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-28
+### Added
+- **KB write guard**: PreToolUse hook (`hooks/guard_kb_writes.py`) on `Write|Edit|MultiEdit|NotebookEdit`; asks the user to confirm before any write inside the plugin's own `kb/`. Silent elsewhere. Test: `tests/test_guard_kb_writes.py`.
+### Changed
+- `refresh-forge-kb` audit fixes: `allowed-tools` no longer pre-approves Write/Edit/Bash (writes now raise a normal permission prompt behind Gate 3; `Task` renamed `Agent`); no scheduled or silent fetch; curator tier is always `advisory`; absolute plugin root passed to subagents; fuller subagent briefs and parallel curators; reasons and cross-provider notes for each mandatory model; `template-updater` loses `Write`; step 7 names the pointer target.
+- `refresh-forge-kb` subagents `source-curator` and `template-updater` moved from `skills/refresh-forge-kb/agents/` to the plugin `agents/` folder as real plugin agents, spawned as `skill-forge:source-curator` and `skill-forge:template-updater`; prompt-review fixes (plugin-root resolution, WebFetch/WebSearch dropped from the orchestrator, injection guardrail, before/after in template-updater output).
+- README: `refresh-forge-kb` is no longer described as schedulable.
+
 ## [0.3.1] — 2026-10-28
 ### Fixed
 - `forge-wizard` publish step no longer restates the commit format or the old "startup exception: everything to main": it follows the user's own conventions, never commits straight to `main`, and merges only when the user asks.
