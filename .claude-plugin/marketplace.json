@@ -13,6 +13,11 @@
       "name": "delegation",
       "source": "./plugins/delegation",
       "description": "Hand token-heavy, low-reasoning tasks to free models: text to local Ollama, file work to an opencode agent (local when the material has data, free cloud when it has none), with a data scan, a model allowlist and a benchmark."
+    },
+    {
+      "name": "knowledge-base",
+      "source": "./plugins/knowledge-base",
+      "description": "Read, explain, correct, and research the global knowledge base with the kb CLI (INDEX.md fallback), three-gate research pipeline with single-task agents, and a hook that asks before any KB write outside .raw/."
     }
   ]
 }

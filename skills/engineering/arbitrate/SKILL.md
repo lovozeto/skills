@@ -7,7 +7,7 @@ disable-model-invocation: true
 # arbitrate — resolve UX-vs-tech clashes
 
 Invoked by exception. Never runs by default. Does not participate in the KB pipeline
-(that's `/kb-pipeline`'s job — it only marks conflicts, never resolves them).
+(that's `/knowledge-base:kb-pipeline`'s job — it only marks conflicts, never resolves them).
 
 A clash happens when what the design intends conflicts with what the platform allows — and
 neither a design agent nor a technical agent can resolve it alone because each sees only
