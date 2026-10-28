@@ -55,9 +55,13 @@ Writes end-of-session state so the next session starts oriented, and keeps the r
    (overwrite with the same approved draft) when `<repo>` is not `~/GitHub`; the approved
    `CLAUDE.md` changes; and, for each approved `move`, append the line to its target file
    (create it if missing).
-7. Show the user what was written, and remind them to commit `QUICK-STATE.md` with this
-   session's work: the next doc-pruner diff starts from that commit. Done when every approved
-   file is written and shown.
+7. Commit `QUICK-STATE.md` on the branch of this session's last PR, so it ships in that PR
+   (global rule in `~/dev/claude-kb/CONVENTIONS.md`); the next doc-pruner diff starts from
+   that commit. If the repo is on `main` with no open PR from this session, create a
+   `docs/quick-state-<topic>` branch and open a PR for it. Never leave `QUICK-STATE.md`
+   modified and uncommitted on `main`. Show the user what was written and the PR it went into.
+   Done when every approved file is written, `QUICK-STATE.md` is committed on a PR branch, and
+   both are shown.
 
 ## Subcommand: pr
 
