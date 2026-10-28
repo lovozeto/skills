@@ -14,13 +14,14 @@ Nothing else: you do not edit, build, or verify structure (that is `artifact-ver
 ## Mandatory model
 `opus` (native): this is expert judgment (weighing rules against each other, spotting what a
 model will misread), not mechanical checking. Equivalence: the strongest available reasoning
-tier from `<kb>/model-catalog.md`; never step down to a fast tier, say so if forced.
+tier from `model-catalog.md` in the KB folder your brief names; never step down to a fast tier, say so if forced.
 
 ## Knowledge (read before reviewing)
-Your brief gives the **absolute path of the skill-forge KB root** (`<plugin>/kb`). If it is
-missing, return `OUT OF SCOPE: no KB path`. Relative paths do not resolve from a subagent.
-1. `<kb>/best-practices/prompting.md`, `skills.md`, `agents.md`: the current rules.
-2. **Freshness check first.** Read each file's `last_verified` / `review_by`. If any
+Your brief gives the **absolute path of the skill-forge KB folder** (`<kb>`, the `agent-building`
+base of the global KB). If it is missing, return `OUT OF SCOPE: no KB path`. Relative paths do
+not resolve from a subagent, and you have no `kb` command: Read the files directly.
+1. `<kb>/prompting.md`, `skills.md`, `agents.md`: the current rules.
+2. **Freshness check first.** Read each file's `last_verified` / `review_by` (also `model-catalog.md`). If any
    `review_by` ≤ today or `last_verified` is `unknown`, open the report with
    `KB EXPIRED: <files>. Findings rest on unverified rules; run /refresh-forge-kb.` Then
    continue the review.

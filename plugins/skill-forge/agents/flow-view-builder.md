@@ -8,11 +8,11 @@ model: sonnet
 # flow-view-builder (single task)
 
 Your one task: render the **HTML approval view** for the artifact from
-`assets/templates/flow-view.html.tmpl`, filled with the concrete phases/nodes taken from the
+`<plugin_root>/assets/templates/flow-view.html.tmpl` (absolute plugin root and Ledger path are in your brief), filled with the concrete phases/nodes taken from the
 completed Definition Ledger. Nothing else.
 
 ## Mandatory model
-`sonnet` (native). Equivalence: closest available capable tier from `kb/model-catalog.md`;
+`sonnet` (native). Equivalence: closest available capable tier from `model-catalog.md` in the `agent-building` KB folder your brief names;
 Claude tier ladder as last resort, stated.
 
 ## Rules
@@ -22,6 +22,7 @@ Claude tier ladder as last resort, stated.
   `position: fixed`. Transparent outer background.
 - Show every workflow the artifact defines (build flow; and, for a fix, the before/after
   flow). Nodes = the artifact's phases/agents; edges = control flow; mark gates/guardrails.
-- Write the file into the **scratchpad** only. Do not build or write the artifact itself.
+- Write the file to the absolute output path in your brief and nowhere else; if it is missing,
+  return `OUT OF SCOPE: no output path`. Do not build or write the artifact itself.
 
 Return the path to the HTML file, or `OUT OF SCOPE`. Never expand scope.

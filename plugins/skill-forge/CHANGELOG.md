@@ -5,6 +5,17 @@ follow semver (patch = fix, minor = new capability, major = breaking).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-10-28
+### Changed
+- **The plugin no longer ships its KB.** `kb/` moved to the global KB as the base `agent-building` (`agents`, `skills`, `plugins`, `hooks`, `prompting`, `model-catalog`, `wizards`), in the lobomorir-ai-setup repo. `forge-wizard`, its templates and its agents read it with `kb get agent-building/<file>`; fallback when `kb` is missing or fails: `${KB_ROOT:-~/dev/claude-kb}/INDEX.md`. Subagents (no `kb`) receive the absolute KB folder in their brief.
+- `refresh-forge-kb` now targets `${KB_ROOT:-~/dev/claude-kb}/agent-building` and the base's entry in the KB's `sources.yml`; it keeps the KB file format, runs `kb lint`, takes `review_by` from the KB's `CONVENTIONS.md` volatility table, and reminds the user that the KB repo needs its own branch and PR.
+- SessionStart sensor uses `kb stale` filtered to `agent-building/`; silent when `kb` is missing.
+- The four `forge-wizard` agents (`agent-prompt-reviewer`, `artifact-verifier`, `dependency-analyzer`, `flow-view-builder`) moved from `skills/forge-wizard/agents/` to the plugin `agents/` folder, so their `tools` and `model` apply; they are spawned as `skill-forge:<name>`. `forge-wizard` now spawns the dependency analyzer (Phase 4) and the artifact verifier (Phase 5c) by name. `agents/openai.yaml` stays.
+### Removed
+- `kb/` (moved, see above), the PreToolUse `guard_kb_writes.py` hook and its test: a distributable hook cannot know the global KB path without hardcoding it. KB writes stay behind `refresh-forge-kb` Gate 3 and the normal permission prompt.
+### Added
+- `tests/test_session_context.py` for the new sensor.
+
 ## [0.4.0] — 2026-10-28
 ### Added
 - **KB write guard**: PreToolUse hook (`hooks/guard_kb_writes.py`) on `Write|Edit|MultiEdit|NotebookEdit`; asks the user to confirm before any write inside the plugin's own `kb/`. Silent elsewhere. Test: `tests/test_guard_kb_writes.py`.

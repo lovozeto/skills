@@ -17,7 +17,15 @@ and keep the decisions.
 
 1. **Zero holes.** Suggest, then wait for the user to confirm. Every required field comes from
    the user or from a source you read; generation waits while any Ledger field is `PENDING`.
-2. **The KB is the source of truth.** Read this plugin's `kb/` for best practices and models.
+2. **The KB is the source of truth.** It is the base `agent-building` of the global KB (files:
+   `agents`, `skills`, `plugins`, `hooks`, `prompting`, `model-catalog`, `wizards`). Read it with
+   `kb get agent-building/<file>` or `kb search --base agent-building "<topic>"`. If `kb` is
+   missing or exits non-zero, read `${KB_ROOT:-~/dev/claude-kb}/INDEX.md` and open only the
+   matching `agent-building/` file; if neither works, say the KB is unreachable and ask before
+   going on. Subagents have no `kb`: give each the absolute folder
+   `${KB_ROOT:-~/dev/claude-kb}/agent-building` (expanded) and the absolute plugin root. Every brief
+   also gives the absolute Ledger path, the absolute paths of the files to act on and, for a
+   subagent that writes, the absolute output path.
    Point to it from generated artifacts. When you wire KB knowledge, state its `tier`
    (`advisory` guides; only `proven` backs code).
 3. **One agent = one task.** Every subagent you spawn or generate has exactly one task and
@@ -38,7 +46,7 @@ calling the Skill tool with its name. Each row says what to do when it is missin
 | `grilling` | 1 | Ask the Ledger's `PENDING` fields in numbered rounds, each with your recommended answer |
 | `domain-modeling` | 1b | Skip; record "glossary/ADRs skipped" in the Ledger |
 | `codebase-design` | 3 | Cut agents by the one-task rule alone |
-| `writing-for-agents` | 3b, 5b | Use `kb/best-practices/prompting.md` and `skills.md` only |
+| `writing-for-agents` | 3b, 5b | Use `agent-building/prompting` and `agent-building/skills` only |
 | `wizard` | 4 | Write human-only steps as numbered prose in `setup.md` |
 | `tdd` | 5 | Write each shipped script with at least one runnable check |
 | `code-review` | 5c | Check the built files against the Ledger, line by line, and report gaps |
@@ -65,7 +73,8 @@ is written into the repo, at the target path the user approves.
    that constrains the artifact (language, budgets, naming, branching, knowledge homes) in the
    Ledger's constraints. Where a convention and this wizard disagree, the user's convention
    wins; say so.
-3. Read `last_verified` / `review_by` in every `kb/` file. If any is `unknown` or its
+3. Run `kb stale` and keep the `agent-building/` lines (fallback: read `last_verified` /
+   `review_by` in every `agent-building/` file). If any is `unknown` or its
    `review_by` ≤ today, tell the user the prompting rules are unverified and that they can
    type `/refresh-forge-kb` first. If they proceed, record that in the Ledger.
 
@@ -114,7 +123,7 @@ to remove.
 
 Set the **mandatory model** for the orchestrator and each subagent following
 `references/model-availability.md` (Claude tier in `model:`, advisory cross-provider note,
-equivalence rule), using `kb/model-catalog.md`. Orchestrator → a reasoning tier
+equivalence rule), using `kb get agent-building/model-catalog`. Orchestrator → a reasoning tier
 (`opus`/`sonnet`); worker → the cheapest tier that clears its bar (`haiku`/`sonnet`).
 
 ### Phase 3b — Invocation choice + always-loaded budget
@@ -134,6 +143,7 @@ and keep it to the minimum that triggers reliably.
 Done when every shipped skill and command has an invocation choice and a reason.
 
 ### Phase 4 — Dependencies, hooks, and KB (mandates)
+- **Classify dependencies** by spawning `skill-forge:dependency-analyzer` with the Ledger.
 - **Own deps** (scripts/assets that must ship) → package them inside the plugin → this
   **forces plugin format**.
 - **Universal deps** (system binaries, packages) → generate a setup file from
@@ -146,8 +156,9 @@ Done when every shipped skill and command has an invocation choice and a reason.
 - **Guardrail hooks.** List the artifact's risks in the Ledger (out-of-scope writes,
   irreversible actions, unmet preconditions, unverified results). Map each risk to a hook
   (event + what it blocks or asks), or to `none: <reason>`.
-- **KB + maintainer (only if knowledge-bearing).** Generate its KB (provenance + tier) and
-  single-task maintainer agent(s); a purely mechanical artifact records "trivial for KB" in the
+- **KB + maintainer (only if knowledge-bearing).** Generate its KB (provenance + tier) in the knowledge home recorded in
+  Phase 0 (for example a global KB base), noting the path in the Ledger, and single-task
+  maintainer agent(s); a purely mechanical artifact records "trivial for KB" in the
   Ledger. Every generated KB file carries `last_verified` (real date or `unknown`) and
   `review_by` by volatility (high: +1 month, medium: +6, low: +12).
 
@@ -157,8 +168,8 @@ a setup step, or a preflight check.
 ### Approval gate — HTML view
 With Phases 0–4 complete, and before any `Write`, build step, or `ExitPlanMode`:
 1. Fill `../../assets/templates/flow-view.html.tmpl` with this artifact's phases and nodes
-   (delegate to `flow-view-builder`, or do it inline). Write it to
-   `<scratchpad>/<artifact>-flow.html`.
+   (spawn `skill-forge:flow-view-builder`, or do it inline). The output path, also in the
+   subagent's brief, is `<scratchpad>/<artifact>-flow.html`.
 2. Show it visually: an inline HTML renderer if the session has one, else send or open the
    file and share its path.
 3. Get explicit approval. On requested changes, revise the definition and re-render.
@@ -172,14 +183,14 @@ Done when the user has approved the rendered view.
 3. Build the artifact from the templates. Call the Skill tool with "tdd" for any script it
    ships (preflight, helpers).
 
-**Phase 5b — Prompt review.** Spawn `agents/agent-prompt-reviewer` (opus) on every drafted
-`SKILL.md`, agent, and command. Its brief gives the **absolute** path of this plugin's `kb/`
+**Phase 5b — Prompt review.** Spawn `skill-forge:agent-prompt-reviewer` (opus) on every drafted
+`SKILL.md`, agent, and command. Its brief gives the **absolute** path of the `agent-building` KB
 folder and of each file to review. Apply its `high` findings and show the user the rest.
 Re-run it until its verdict is `SHIP`, or the user accepts the remaining findings. Relay a
 `KB EXPIRED` line to the user.
 
 **Phase 5c — Verify.** Follow `references/verification.md` (Level 0 structural, Level 1
-trigger evals, known traps). Run `claude plugin validate <plugin-dir>` on every plugin you
+trigger evals, known traps); spawn `skill-forge:artifact-verifier` for Level 0. Run `claude plugin validate <plugin-dir>` on every plugin you
 touched. Call the Skill tool with "code-review" on the work branch with two axes:
 **Standards** (the target repo's conventions) and **Spec** (the completed Ledger is the spec).
 Report any check that could not run.
