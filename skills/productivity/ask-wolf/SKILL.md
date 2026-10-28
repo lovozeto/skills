@@ -28,6 +28,7 @@ its own; **manual** means the user types it.
 |---|---|---|
 | A repo has no `CLAUDE.md` / `QUICK-STATE.md` yet | `/init-project` | auto |
 | Committing with the house standard | `/commit` | manual |
+| Cloning a repo, creating a worktree, or moving a repo folder under `~/GitHub` | `/workspace-layout` | auto |
 
 ## Building skills, agents, plugins
 
