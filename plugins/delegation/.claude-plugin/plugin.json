@@ -1,0 +1,8 @@
+{
+  "name": "delegation",
+  "version": "0.1.0",
+  "description": "Hand token-heavy, low-reasoning tasks to free models: text to a local Ollama model (ask-local), file work to an opencode agent (local Ollama when the material has data, a free cloud model when it does not). Never pay-per-use; never data to the cloud. Includes /delegation:init to set a Mac up (Ollama, models, opencode, machine profile) and a benchmark to measure models before routing to them.",
+  "author": {
+    "name": "lovozeto"
+  }
+}

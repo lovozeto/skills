@@ -2,7 +2,10 @@
 name: delegate
 description: Hand off a token-heavy, low-reasoning task to a free opencode model via `ask-opencode` instead of spending Claude tokens. Use before running any such task — summarize, extract fields, translate, rewrite/clean text, convert format, mechanical code refactor or boilerplate, read/summarize long code, rename/format/search across a repo — and whenever the user says "delegate", "pass this to opencode", or "use a free model".
 argument-hint: "[task description]"
+disable-model-invocation: true
 ---
+
+> **ARCHIVED (2026-10-28).** Superseded by the `delegation` plugin (`plugins/delegation/`, skill `delegate`), which adds local Ollama delegation, a data scan before cloud calls, and the `bench-model` benchmark.
 
 # delegate — hand a task to a free opencode model
 

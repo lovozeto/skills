@@ -50,9 +50,10 @@ its own; **manual** means the user types it.
 
 | Situation | Skill | |
 |---|---|---|
-| A big, low-reasoning task (summarize, extract, convert, mechanical refactor) | `/delegate` (opencode only) | auto |
-| Writing the prompt for a delegated model | `/write-for-model` | auto |
-| Benchmarking a local model (local delegation is paused) | `/benchmark-model` | manual |
+| A big, low-reasoning task (summarize, extract, convert, mechanical refactor) | `/delegation:delegate` (plugin `delegation`) | auto |
+| Writing the prompt for a delegated model | `/delegation:write-for-model` | auto |
+| Setting a Mac up for local models, or checking for better ones | `/delegation:init` | manual |
+| Measuring a model before routing to it | `/delegation:benchmark-model` | manual |
 
 ## Thinking and learning
 

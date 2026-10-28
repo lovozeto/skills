@@ -6,6 +6,8 @@ argument-hint: "<model-id> [--tasks \"classify|summarize|extract|translate|code\
 allowed-tools: Bash(ask-local *), Bash(ask-apple *), Bash(lms *), Read, Write
 ---
 
+> **ARCHIVED (2026-10-28).** Superseded by the `delegation` plugin (`plugins/delegation/`, skill `benchmark-model`), which adds local Ollama delegation, a data scan before cloud calls, and the `bench-model` benchmark.
+
 # benchmark-model — measure a local model and update the routing map
 
 Run after adding a new model to LM Studio or after a model update. Results feed

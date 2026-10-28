@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+# ask-local — run one text task on a local model through Ollama's API.
+# Free, local, private: nothing leaves the machine. One completion, no tools: for tasks that
+# read or edit files use `ask-opencode --model ollama/<id> --dir <repo>`.
+# Calling the API directly sends the model ~150 tokens instead of the ~3,500+ that opencode
+# adds, which makes small models faster and more reliable on text tasks.
+#
+# Usage:
+#   ask-local "Summarize this text: ..."
+#   cat file.py | ask-local --model <id> --system "You are a reviewer" "Find bugs"
+#
+# Prompt: first positional argument, or stdin (pipe).
+# Flags:
+#   --model <id>       name as shown by `ollama list`. Default: $ASK_LOCAL_MODEL, else the
+#                      smallest installed model (fastest, least RAM).
+#   --system <txt>     optional system instruction
+#   --base <url>       Ollama server (default $OLLAMA_HOST_URL or http://127.0.0.1:11434)
+#   --format <f>       `json`, or a JSON schema (inline or @file.json): the reply is forced to
+#                      that shape (Ollama structured outputs)
+#   --think <lvl>      reasoning models only: low | medium | high
+#   --temperature <n>  sampling temperature (default: the model's own)
+#
+# If the default local server is down, it starts Ollama.app (macOS; Linux is planned). Ollama
+# loads the model on demand and unloads it after OLLAMA_KEEP_ALIVE (default 30m) idle.
+#
+# The prompt must fit the model's pinned context (num_ctx): Ollama would otherwise drop its
+# start, where the instruction is, without an error. A prompt estimated above num_ctx
+# (characters / 3.5) is refused; a model with no pinned num_ctx gets a warning (Ollama falls
+# back to a small default window).
+#
+# Output: response text only to stdout, exit 0.
+# exit 2 = bad arguments, server down, no model installed, prompt too long, or the request
+# failed (Ollama's own error message is printed): the caller does the task itself or moves
+# one tier up.
+
+set -eo pipefail
+
+DEFAULT_BASE="http://127.0.0.1:11434"
+BASE="${OLLAMA_HOST_URL:-$DEFAULT_BASE}"
+MODEL="${ASK_LOCAL_MODEL:-}"
+SYSTEM=""
+FORMAT=""
+THINK=""
+TEMPERATURE=""
+KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-30m}"
+prompt=""
+
+fail() { echo "ask-local: $*" >&2; exit 2; }
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --model|--system|--base|--format|--think|--temperature)
+      [[ "$#" -ge 2 ]] || fail "$1 needs a value." ;;
+    --*) fail "unknown flag $1." ;;
+    *) [[ -z "$prompt" ]] || fail "pass the prompt as ONE quoted argument, or via stdin."
+       prompt="$1"; shift; continue ;;
+  esac
+  case "$1" in
+    --model)  MODEL="$2" ;;
+    --system) SYSTEM="$2" ;;
+    --base)   BASE="$2" ;;
+    --format) FORMAT="$2" ;;
+    --think)  THINK="$2" ;;
+    --temperature) TEMPERATURE="$2" ;;
+  esac
+  shift 2
+done
+
+if [[ -z "$prompt" && ! -t 0 ]]; then
+  prompt="$(cat)"
+fi
+if [[ -z "$prompt" ]]; then
+  echo "ask-local: missing prompt (pass it as an argument or via stdin)." >&2
+  exit 2
+fi
+
+up() { curl -sf --max-time 3 "$BASE/api/version" >/dev/null 2>&1; }
+
+# Start the app only for the default local server; a custom URL is someone else's server.
+if ! up && [[ "$BASE" == "$DEFAULT_BASE" ]] && [[ "$(uname)" == "Darwin" ]]; then
+  open -ga Ollama 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do up && break; sleep 1; done
+fi
+if ! up; then
+  echo "ask-local: Ollama is not responding at $BASE. Install or open it (macOS: brew install --cask ollama-app)." >&2
+  exit 2
+fi
+
+if [[ -z "$MODEL" ]]; then
+  MODEL="$(curl -sf --max-time 10 "$BASE/api/tags" | python3 -c '
+import json, sys
+models = json.load(sys.stdin).get("models", [])
+print(min(models, key=lambda m: m.get("size", 0))["name"] if models else "")' 2>/dev/null || true)"
+  if [[ -z "$MODEL" ]]; then
+    echo "ask-local: no model installed in Ollama (see ollama list)." >&2
+    exit 2
+  fi
+fi
+
+# Pinned context window, and a size check against it.
+CTX="$(curl -s --max-time 10 "$BASE/api/show" -H 'Content-Type: application/json' \
+  -d "$(MODEL="$MODEL" python3 -c 'import json,os; print(json.dumps({"model": os.environ["MODEL"]}))')" |
+  python3 -c '
+import json, sys
+try:
+    params = json.load(sys.stdin).get("parameters", "")
+except ValueError:
+    params = ""
+print(next((l.split()[1] for l in params.splitlines() if l.split()[:1] == ["num_ctx"]), ""))' 2>/dev/null)"
+if [[ -z "$CTX" ]]; then
+  echo "ask-local: '$MODEL' has no pinned num_ctx: Ollama uses its small default window and may cut long prompts. Re-pull it with delegation-pull-model." >&2
+  CTX=4096
+fi
+EST=$(( (${#prompt} + ${#SYSTEM}) * 10 / 35 ))
+if (( EST > CTX )); then
+  fail "the prompt is ~$EST tokens but '$MODEL' reads $CTX (num_ctx). Split it, or use a model with a larger window."
+fi
+
+# JSON payload, built with python so escaping is right.
+payload="$(MODEL="$MODEL" SYSTEM="$SYSTEM" PROMPT="$prompt" KEEP_ALIVE="$KEEP_ALIVE" \
+  FORMAT="$FORMAT" THINK="$THINK" TEMPERATURE="$TEMPERATURE" python3 - <<'PY'
+import json, os
+msgs = []
+if os.environ.get("SYSTEM"):
+    msgs.append({"role": "system", "content": os.environ["SYSTEM"]})
+msgs.append({"role": "user", "content": os.environ["PROMPT"]})
+body = {"model": os.environ["MODEL"], "messages": msgs,
+        "keep_alive": os.environ["KEEP_ALIVE"], "stream": False}
+if os.environ.get("TEMPERATURE"):
+    body["options"] = {"temperature": float(os.environ["TEMPERATURE"])}
+fmt = os.environ.get("FORMAT")
+if fmt:
+    if fmt.startswith("@"):
+        with open(fmt[1:]) as f:
+            fmt = f.read()
+    body["format"] = "json" if fmt == "json" else json.loads(fmt)
+if os.environ.get("THINK"):
+    body["think"] = os.environ["THINK"]
+print(json.dumps(body))
+PY
+)" || fail "--format is not valid JSON (or its @file is unreadable)."
+
+TMP_BODY="$(mktemp)"; trap 'rm -f "$TMP_BODY"' EXIT
+code="$(curl -s --max-time 600 -o "$TMP_BODY" -w '%{http_code}' "$BASE/api/chat" \
+  -H 'Content-Type: application/json' -d "$payload")" || fail "the request to Ollama failed."
+CTX="$CTX" python3 - "$TMP_BODY" "$code" <<'REPLY' || exit 2
+import json, os, sys
+body, code = open(sys.argv[1]).read(), sys.argv[2]
+try:
+    data = json.loads(body)
+except ValueError:
+    data = {}
+if code != "200" or "message" not in data:
+    sys.exit("ask-local: Ollama answered %s: %s" % (code, data.get("error") or body.strip()[:300]))
+if data.get("prompt_eval_count", 0) >= int(os.environ["CTX"]):
+    print("ask-local: warning: the prompt filled the whole context window; its start may have been cut.", file=sys.stderr)
+print(data["message"]["content"])
+REPLY

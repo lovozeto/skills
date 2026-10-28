@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# sync-ollama-to-opencode — register the installed Ollama models in opencode's config, so
+# agents can use them as `ollama/<id>`. opencode does not discover Ollama models on its own.
+# Each model is registered with the context window Ollama actually opens (its pinned
+# num_ctx), so opencode never sends more than the model reads.
+#
+# Usage:
+#   sync-ollama-to-opencode [--opencode-json <path>]            add or refresh provider.ollama
+#   sync-ollama-to-opencode [--opencode-json <path>] --remove   drop provider.ollama
+# Default config: ~/.config/opencode/opencode.json. Other providers are left untouched.
+# Run after pulling or removing models. Exit 2 = Ollama not responding (add mode only).
+
+set -eo pipefail
+
+BASE="${OLLAMA_HOST_URL:-http://127.0.0.1:11434}"
+OPENCODE_JSON="$HOME/.config/opencode/opencode.json"
+REMOVE=0
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --opencode-json) OPENCODE_JSON="$2"; shift 2 ;;
+    --remove) REMOVE=1; shift ;;
+    *) echo "sync-ollama-to-opencode: unknown argument $1" >&2; exit 2 ;;
+  esac
+done
+
+if [[ "$REMOVE" == 1 ]]; then
+  [[ -f "$OPENCODE_JSON" ]] || exit 0
+  python3 - "$OPENCODE_JSON" <<'PY'
+import json, sys
+path = sys.argv[1]
+cfg = json.load(open(path))
+if cfg.get("provider", {}).pop("ollama", None) is not None:
+    with open(path, "w") as f:
+        json.dump(cfg, f, indent=2)
+        f.write("\n")
+    print("sync-ollama: removed provider.ollama from " + path)
+PY
+  exit 0
+fi
+
+up() { curl -sf --max-time 3 "$BASE/api/version" >/dev/null 2>&1; }
+if ! up && [[ "$BASE" == "http://127.0.0.1:11434" && "$(uname)" == "Darwin" ]]; then
+  open -ga Ollama 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do up && break; sleep 1; done
+fi
+if ! up; then
+  echo "sync-ollama: Ollama not responding at $BASE. Open Ollama.app." >&2
+  exit 2
+fi
+
+mkdir -p "$(dirname "$OPENCODE_JSON")"
+BASE="$BASE" python3 - "$OPENCODE_JSON" <<'PY'
+import json, os, sys, urllib.request
+
+base = os.environ["BASE"]
+path = sys.argv[1]
+
+
+def api(route, body=None):
+    req = urllib.request.Request(base + route, data=json.dumps(body).encode() if body else None,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.load(r)
+
+
+def display_name(info, model_id):
+    d = info.get("details", {})
+    size, quant = d.get("parameter_size", ""), d.get("quantization_level", "")
+    name = model_id.split(":")[0]
+    return "%s (%s)" % (name, " ".join(x for x in (size, quant) if x)) if size or quant else name
+
+
+def context_length(model_id):
+    # The window Ollama opens is the model's num_ctx parameter, not its trained maximum.
+    try:
+        show = api("/api/show", {"model": model_id})
+    except Exception:
+        return None
+    for line in show.get("parameters", "").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[0] == "num_ctx":
+            return int(parts[1])
+    return next((v for k, v in show.get("model_info", {}).items() if k.endswith(".context_length")), None)
+
+
+cfg = json.load(open(path)) if os.path.exists(path) else {}
+provider = cfg.setdefault("provider", {}).setdefault("ollama", {})
+provider["npm"] = "@ai-sdk/openai-compatible"
+provider["name"] = "Ollama (local)"
+provider.setdefault("options", {})["baseURL"] = base + "/v1"
+models = {}
+for m in api("/api/tags").get("models", []):
+    entry = {"name": display_name(m, m["name"])}
+    ctx = context_length(m["name"])
+    if ctx:
+        entry["limit"] = {"context": min(int(ctx), 32768), "output": 4096}
+    models[m["name"]] = entry
+stale = [k for k in provider.get("models", {}) if k not in models]
+provider["models"] = models
+with open(path, "w") as f:
+    json.dump(cfg, f, indent=2)
+    f.write("\n")
+print("sync-ollama: %d model(s) registered in %s" % (len(models), path))
+for mid in models:
+    print("  ollama/" + mid)
+if stale:
+    print("  removed %d stale: %s" % (len(stale), ", ".join(stale)))
+PY

@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+# ask-opencode — run one delegated task through opencode. Zero cost: free cloud models or
+# local Ollama models only.
+#
+# Two modes:
+#   text    (no --dir)  the model works in a fresh EMPTY temp folder: nothing to read.
+#   agentic (--dir X)   the model reads and edits files inside X.
+#
+# Isolation (both modes):
+#   - The model does NOT receive ~/.claude/CLAUDE.md: opencode injects it through its config
+#     and its Claude Code compatibility. An empty XDG_CONFIG_HOME plus
+#     OPENCODE_DISABLE_CLAUDE_CODE=1 removes both.
+#   - opencode's free tier refuses an agent with every tool disabled, so text mode isolates
+#     with an empty working folder instead.
+#   - The `lean` agent (short prompt; no web, todo, task or skill tools) sends ~3,500 input
+#     tokens instead of ~11,600 for opencode's default agent. `--full` uses the default agent.
+#   - bash is off in text mode and for every cloud model: opencode confines its file tools to
+#     the working folder, but bash could read anything on the machine. Local models editing
+#     a repo keep bash.
+#
+# Policy, enforced here so it holds for every caller:
+#   - Allowed models: opencode/*-free, google/gemini-*-flash* (free tier), ollama/*.
+#     Anything else exits 4: no pay-per-use models.
+#   - Cloud models get only data-free material. Before a cloud call, the prompt is scanned for
+#     emails, phone numbers, long digit runs, API keys, JWTs and private keys, and --dir for
+#     data or secret files (.env*, *.pem, id_rsa*, credentials*, *.key, *.db, *.sqlite*,
+#     *.sql, *.csv, *.parquet). A hit exits 3 and names what it found. This is a mechanical
+#     safety net: it catches the obvious cases, it cannot prove the material is data-free.
+#     ollama/* models never leave the machine and skip the scan.
+#
+# Usage:
+#   ask-opencode --model opencode/<id>-free "Summarize this log: ..."
+#   echo "prompt" | ask-opencode --model google/gemini-3.1-flash-lite
+#   ask-opencode --model ollama/<id> --dir /path/to/repo "Rename compute_total to calculate_total"
+#
+# Prompt: first positional argument, or stdin (pipe).
+# Flags:
+#   --model <id>  model to use; default: $ASK_OPENCODE_MODEL. With neither, exits 2 and lists
+#                 the free models: the caller chooses, this script does not guess.
+#   --dir <path>  agentic mode: working folder the model may read and edit
+#   --full        use opencode's default agent instead of the lean one
+#   --unsafe      pass --auto to opencode: approves ALL tool permissions, including
+#                 destructive ones. Explicit opt-in only.
+#
+# Output: response text to stdout, exit 0.
+# Exit codes: 2 = opencode missing, no model, or the run failed · 3 = data found for a cloud
+# model · 4 = model not allowed.
+
+set -eo pipefail
+
+MODEL="${ASK_OPENCODE_MODEL:-}"
+DIR=""
+AUTO_FLAG=""
+AGENT_FLAG="--agent lean"
+prompt=""
+
+while [[ "$#" -gt 0 ]]; do
+  if [[ "$1" == --model || "$1" == --dir ]] && [[ "$#" -lt 2 ]]; then
+    echo "ask-opencode: $1 needs a value." >&2; exit 2
+  fi
+  case "$1" in
+    --model)  MODEL="$2"; shift 2 ;;
+    --dir)    DIR="$2";   shift 2 ;;
+    --unsafe) AUTO_FLAG="--auto"; shift ;;
+    --full)   AGENT_FLAG=""; shift ;;
+    *)        prompt="$1"; shift ;;
+  esac
+done
+
+if [[ -z "$prompt" && ! -t 0 ]]; then
+  prompt="$(cat)"
+fi
+if [[ -z "$prompt" ]]; then
+  echo "ask-opencode: missing prompt (pass it as an argument or via stdin)." >&2
+  exit 2
+fi
+
+OPENCODE="$(command -v opencode 2>/dev/null || true)"
+[[ -z "$OPENCODE" && -x "/opt/homebrew/bin/opencode" ]] && OPENCODE="/opt/homebrew/bin/opencode"
+if [[ -z "$OPENCODE" ]]; then
+  echo "ask-opencode: opencode not found. Install it with: brew install opencode" >&2
+  exit 2
+fi
+
+if [[ -z "$MODEL" ]]; then
+  echo "ask-opencode: no model. Pass --model or set ASK_OPENCODE_MODEL. Free models now:" >&2
+  "$OPENCODE" models 2>/dev/null | grep -E '^opencode/.*-free$' >&2 || true
+  echo "Local models: ollama/<id> (see ollama list)." >&2
+  exit 2
+fi
+
+case "$MODEL" in
+  ollama/*) CLOUD=0 ;;
+  opencode/*-free|google/gemini-*-flash*) CLOUD=1 ;;
+  *)
+    echo "ask-opencode: model '$MODEL' is not allowed. Use opencode/*-free, google/gemini-*-flash* (free tier) or ollama/*: never a pay-per-use model." >&2
+    exit 4 ;;
+esac
+
+if [[ -n "$DIR" && ! -d "$DIR" ]]; then
+  echo "ask-opencode: --dir '$DIR' is not a folder." >&2
+  exit 2
+fi
+
+if [[ "$CLOUD" == 1 ]]; then
+  if ! findings="$(PROMPT="$prompt" python3 - "$DIR" <<'PY'
+import fnmatch, os, re, sys
+
+prompt = os.environ["PROMPT"]
+found = []
+
+# Dates and times look like digit runs; drop them before counting digits.
+scan = re.sub(r"\b\d{4}-\d{2}-\d{2}(?:[T ]\d{1,2}:\d{2}(?::\d{2})?)?\b|\b\d{1,2}:\d{2}\b", " ", prompt)
+emails = [e for e in re.findall(r"[\w.+-]+@([\w-]+\.[\w.-]+)", scan)
+          if not re.fullmatch(r"example\.(com|org|net)", e.lower())]
+if emails:
+    found.append("an email address")
+if any(len(re.sub(r"\D", "", m)) >= 10 for m in re.findall(r"\+?\d[\d \-.()]{6,}\d", scan)) \
+        or re.search(r"\d{9,}", scan):
+    found.append("a phone number or long digit run")
+secrets = {
+    "an API key": r"\b(sk|pk|rk)-[A-Za-z0-9_-]{20,}|\bAKIA[0-9A-Z]{16}\b|\bgh[pousr]_[A-Za-z0-9]{30,}|\bAIza[0-9A-Za-z_-]{35}\b|\bxox[abpr]-[A-Za-z0-9-]{10,}",
+    "a JWT": r"\beyJ[\w-]{5,}\.[\w-]{5,}\.[\w-]{5,}",
+    "a private key": r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
+}
+found += [name for name, pat in secrets.items() if re.search(pat, prompt)]
+
+data_files = [".env*", "*.pem", "id_rsa*", "credentials*", "*.key", "*.db", "*.sqlite*",
+              "*.sql", "*.csv", "*.parquet"]
+skip_dirs = {".git", "node_modules", ".venv", "venv", "__pycache__"}
+root = sys.argv[1]
+if root:
+    hits = []
+    for base, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
+        hits += [os.path.relpath(os.path.join(base, f), root)
+                 for f in files if any(fnmatch.fnmatch(f, p) for p in data_files)]
+    if hits:
+        found.append("data or secret files in --dir: " + ", ".join(sorted(hits)[:10]))
+
+if found:
+    print("; ".join(found))
+    sys.exit(1)
+PY
+)"; then
+    echo "ask-opencode: not sent to cloud model '$MODEL': found $findings." >&2
+    echo "Cloud models get only data-free material. Use a local model (ollama/<id>) or keep the task on Claude." >&2
+    exit 3
+  fi
+fi
+
+# Isolated config home and (text mode) an empty working folder, removed on exit.
+SANDBOX="$(mktemp -d "${TMPDIR:-/tmp}/ask-opencode.XXXXXX")"
+trap 'rm -rf "$SANDBOX"' EXIT
+mkdir -p "$SANDBOX/config/opencode" "$SANDBOX/work"
+ERR_TMP="$SANDBOX/stderr"
+# Carry over only the `provider` section of the user's config (e.g. local Ollama models), so
+# custom providers still resolve while instructions and agents stay out; add the lean agent.
+BASH_TOOL=0; [[ "$CLOUD" == 0 && -n "$DIR" ]] && BASH_TOOL=1
+BASH_TOOL="$BASH_TOOL" python3 - "$HOME/.config/opencode/opencode.json" "$SANDBOX/config/opencode/opencode.json" <<'PY' 2>/dev/null || true
+import json, os, sys
+try:
+    with open(sys.argv[1]) as f:
+        providers = json.load(f).get("provider", {})
+except (OSError, ValueError):
+    providers = {}
+lean = {
+    "mode": "primary",
+    "prompt": ("You do one delegated task. Do exactly what the task says and nothing more. "
+               "Use tools only when the task needs files. Never change anything the task did "
+               "not ask you to change. Reply only with what the task asks for."),
+    "tools": {name: False for name in
+              ("webfetch", "websearch", "todowrite", "todoread", "task", "skill")},
+}
+if os.environ.get("BASH_TOOL") != "1":
+    lean["tools"]["bash"] = False
+with open(sys.argv[2], "w") as f:
+    json.dump({"$schema": "https://opencode.ai/config.json", "provider": providers,
+               "permission": {"skill": {"*": "deny"}}, "agent": {"lean": lean}}, f)
+PY
+[[ -z "$DIR" ]] && DIR="$SANDBOX/work"
+
+# shellcheck disable=SC2086  # AUTO_FLAG and AGENT_FLAG are intentionally unquoted (may be empty)
+if ! output="$(printf '%s\n' "$prompt" | XDG_CONFIG_HOME="$SANDBOX/config" OPENCODE_DISABLE_CLAUDE_CODE=1 \
+      "$OPENCODE" run --model "$MODEL" --dir "$DIR" $AGENT_FLAG $AUTO_FLAG 2>"$ERR_TMP")"; then
+  err="$(cat "$ERR_TMP" 2>/dev/null)"
+  echo "ask-opencode: opencode run failed (model '$MODEL', dir '$DIR')." >&2
+  [[ -n "$err" ]] && echo "$err" >&2
+  exit 2
+fi
+
+printf '%s\n' "$output"

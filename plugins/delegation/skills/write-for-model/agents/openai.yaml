@@ -1,0 +1,3 @@
+interface:
+  display_name: "Write for Model"
+  short_description: "Build a prompt tuned to one delegation target"

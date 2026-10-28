@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake ask-opencode for bench-model tests: FAKE_AGENT=fix applies sh_feat's reference fix.
+dir=""; while [[ $# -gt 0 ]]; do [[ "$1" == "--dir" ]] && dir="$2"; shift; done
+if [[ "${FAKE_AGENT:-}" == fix ]]; then
+  python3 -c 'import sys;p=sys.argv[1];s=open(p).read();open(p,"w").write(s.replace("name=","if [ \"${1:-}\" = \"-h\" ]; then echo \"usage: greet.sh [NAME]\"; exit 0; fi\nname=",1))' "$dir/greet.sh"
+fi
+echo DONE

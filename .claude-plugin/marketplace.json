@@ -8,6 +8,11 @@
       "name": "skill-forge",
       "source": "./plugins/skill-forge",
       "description": "Guided wizard to design and build agents, skills, and plugins with zero-hole definition, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, and an HTML approval view."
+    },
+    {
+      "name": "delegation",
+      "source": "./plugins/delegation",
+      "description": "Hand token-heavy, low-reasoning tasks to free models: text to local Ollama, file work to an opencode agent (local when the material has data, free cloud when it has none), with a data scan, a model allowlist and a benchmark."
     }
   ]
 }

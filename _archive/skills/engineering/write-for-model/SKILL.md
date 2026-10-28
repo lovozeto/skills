@@ -2,7 +2,10 @@
 name: write-for-model
 description: Build an optimized prompt for a specific delegation target (a free model via ask-opencode, or an external tool). Invoke before delegating a task to ensure the prompt matches what the target model actually responds to well. Wraps prompt-master with model-specific context.
 argument-hint: "[--target <model-id>] [--task <description>]"
+disable-model-invocation: true
 ---
+
+> **ARCHIVED (2026-10-28).** Superseded by the `delegation` plugin (`plugins/delegation/`, skill `write-for-model`), which adds local Ollama delegation, a data scan before cloud calls, and the `bench-model` benchmark.
 
 # write-for-model
 
