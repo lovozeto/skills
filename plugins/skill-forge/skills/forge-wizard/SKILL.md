@@ -190,9 +190,10 @@ Report any check that could not run.
 2. Add a dated `CHANGELOG.md` entry (from `../../assets/templates/CHANGELOG.md.tmpl` if absent).
 3. If the target repo has a router skill (one that maps the others and when to use each) or a
    skill table in its README, add the new artifact to both in the same change.
-4. Commit on the work branch with Conventional Commits (English, imperative, ≤ 50 chars).
-5. With the user's confirmation, merge to `main` (via PR when the repo uses them). The branch
-   is the unit of finished work, also under a "startup exception: everything to main" rule.
+4. Commit on the work branch following the user's commit and branch conventions (their
+   `CLAUDE.md` points to them; with none, Conventional Commits).
+5. Open a PR (in a repo without a remote, merge the branch locally) and merge only when the
+   user asks for that merge. Nothing goes straight to `main`.
 
 ### Done when
 - [ ] The Definition Ledger has zero `PENDING` fields (kept in the scratchpad for audit).
