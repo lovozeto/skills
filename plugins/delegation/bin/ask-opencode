@@ -52,6 +52,9 @@ AGENT_FLAG="--agent lean"
 prompt=""
 
 while [[ "$#" -gt 0 ]]; do
+  if [[ "$1" == --model || "$1" == --dir ]] && [[ "$#" -lt 2 ]]; then
+    echo "ask-opencode: $1 needs a value." >&2; exit 2
+  fi
   case "$1" in
     --model)  MODEL="$2"; shift 2 ;;
     --dir)    DIR="$2";   shift 2 ;;

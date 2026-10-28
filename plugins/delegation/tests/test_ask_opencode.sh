@@ -44,4 +44,5 @@ rm "$T/repo/src/.env.local"; touch "$T/repo/src/guests.sqlite3"
 
 out="$("$AO" --model ollama/devstral-small-2:24b --dir "$T/repo" "Email ana.perez@gmail.com" 2>&1)"; rc=$?
 expect_eq "local model skips the data check" "$rc" 0
+"$AO" --model >/dev/null 2>&1; expect_eq "--model without value -> exit 2" "$?" 2
 finish

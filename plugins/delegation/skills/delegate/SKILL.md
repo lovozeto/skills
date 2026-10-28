@@ -74,7 +74,9 @@ Done when one route and one model id are fixed, or the task is back on Claude.
 
 ## 5. Write the prompt
 
-Call the Skill tool with "delegation:write-for-model", passing the model id and the task. Done when it returns the final prompt.
+Call the Skill tool with "delegation:write-for-model", passing the model id and the task. If it reports `prompt-master` missing, stop here: tell
+the user the install command it gave and do the task yourself. Done when it returns the
+final prompt.
 
 ## 6. Run
 

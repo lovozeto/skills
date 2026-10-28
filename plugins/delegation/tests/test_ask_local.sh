@@ -23,4 +23,5 @@ expect_eq "schema, think, system, temperature reach the API" \
 OLLAMA_HOST_URL="http://127.0.0.1:9" "$AL" "x" >/dev/null 2>&1
 expect_eq "server down on a custom URL -> exit 2" "$?" 2
 "$AL" >/dev/null 2>&1 </dev/null; expect_eq "missing prompt -> exit 2" "$?" 2
+"$AL" --model >/dev/null 2>&1; expect_eq "--model without value -> exit 2" "$?" 2
 finish

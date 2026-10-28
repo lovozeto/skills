@@ -40,6 +40,9 @@ KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-30m}"
 prompt=""
 
 while [[ "$#" -gt 0 ]]; do
+  if [[ "$1" == --* && "$#" -lt 2 ]]; then
+    echo "ask-local: $1 needs a value." >&2; exit 2
+  fi
   case "$1" in
     --model)  MODEL="$2";  shift 2 ;;
     --system) SYSTEM="$2"; shift 2 ;;

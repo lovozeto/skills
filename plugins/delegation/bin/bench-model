@@ -49,6 +49,7 @@ row() { printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$TODAY" "$MODEL" "$@" | tee -a "$
 
 TIMEOUT=""
 for t in timeout gtimeout; do command -v "$t" >/dev/null && { TIMEOUT="$t 600"; break; }; done
+[[ -z "$TIMEOUT" ]] && echo "bench-model: no timeout command (timeout/gtimeout): a hung model blocks the run." >&2
 
 if [[ "$CLASSES" != text ]]; then
   # shellcheck source=../bench/code/tasks.sh

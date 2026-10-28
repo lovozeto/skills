@@ -3,6 +3,11 @@
 Hand token-heavy, low-reasoning tasks to free models instead of spending Claude tokens, and
 check what comes back.
 
+```bash
+/plugin marketplace add lovozeto/skills
+/plugin install delegation@lovozeto-skills
+```
+
 One rule decides the route:
 
 | The task… | Material with data or credentials | Material without data |
