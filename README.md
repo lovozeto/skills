@@ -37,6 +37,7 @@ npx skills add lovozeto/skills -g -y
 |---|---|
 | `/ask-wolf` | Router: which skill or flow fits your situation (manual) |
 | `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
+| `/track-work` | Keep the GitHub issue and its board column current while you work |
 | `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
 
 ### Media
