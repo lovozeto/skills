@@ -1,7 +1,6 @@
 ---
 name: kanban
 description: Organiza y consulta ideas, tareas y progreso en el tablero Kanban del proyecto (GitHub Projects o KANBAN.md).
-disable-model-invocation: true
 ---
 
 # kanban — Tablero Ágil de Tareas

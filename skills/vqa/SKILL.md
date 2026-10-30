@@ -1,7 +1,6 @@
 ---
 name: vqa
 description: Visual QA. Audita pantallas y componentes en múltiples breakpoints (375, 768, 1280 px) y en modo claro/oscuro, detectando desalineaciones, fuentes incorrectas y regresiones visuales.
-disable-model-invocation: true
 ---
 
 # vqa — Auditoría Visual (Visual QA)

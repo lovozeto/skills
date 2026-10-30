@@ -1,7 +1,6 @@
 ---
 name: copy-review
 description: Audita y redacta microcopy, mensajes de error, etiquetas de botones y textos de interfaz en el tono de voz adecuado, sin rodeos ni patrones de culpa.
-disable-model-invocation: true
 ---
 
 # copy-review — Redacción y Microcopy de Interfaz

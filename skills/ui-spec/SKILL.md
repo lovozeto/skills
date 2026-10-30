@@ -1,7 +1,6 @@
 ---
 name: ui-spec
 description: Especifica decisiones de interfaz de usuario (jerarquía, escalas tipográficas, paleta de color con contraste AA, espaciado, breakpoints responsive y estados de componentes).
-disable-model-invocation: true
 ---
 
 # ui-spec — Especificación de Interfaz y Diseño

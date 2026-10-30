@@ -1,7 +1,6 @@
 ---
 name: qa
 description: Ejecuta auditoría técnica estricta (build, TypeScript/compilación, resolución de imports, cobertura de estados de error/carga y validación de lógica). Reporta errores reales sin suposiciones.
-disable-model-invocation: true
 ---
 
 # qa — Auditoría Técnica y Validación de Código

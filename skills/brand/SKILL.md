@@ -2,7 +2,6 @@
 name: brand
 description: Genera y actualiza las directrices de marca del proyecto (paleta de colores con contraste WCAG, escala tipográfica, reglas del logo/marca, espaciado y dos & don'ts visuales).
 model: sonnet
-disable-model-invocation: true
 ---
 
 # brand — Identidad de Marca y Sistemas Visuales

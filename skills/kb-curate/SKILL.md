@@ -2,7 +2,6 @@
 name: kb-curate
 description: Extrae reglas atómicas y de alta fidelidad desde fuentes de documentación, URLs o artículos técnicos hacia la Base de Conocimiento (shared/claude-kb/).
 model: sonnet
-disable-model-invocation: true
 ---
 
 # kb-curate — Extracción y Curaduría de Conocimiento Atómico

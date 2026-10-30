@@ -1,7 +1,6 @@
 ---
 name: web-graphics
 description: Construye componentes de gráficos interactivos en tiempo real (Canvas 2D, WebGL, Three.js, partículas, animaciones y efectos visuales) optimizados para alto rendimiento a 60 fps.
-disable-model-invocation: true
 ---
 
 # web-graphics — Especialista en Gráficos Web en Tiempo Real

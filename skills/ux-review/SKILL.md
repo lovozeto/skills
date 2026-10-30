@@ -1,7 +1,6 @@
 ---
 name: ux-review
 description: Evalúa flujos de usuario, jerarquía de información, ergonomía móvil (tap targets >= 44px), claridad de interacción y prevención de patrones oscuros.
-disable-model-invocation: true
 ---
 
 # ux-review — Auditoría de Experiencia de Usuario
