@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# Fake curl for downloads: writes a small file where -o points; logs the URL.
-out=""; url=""; while [[ $# -gt 0 ]]; do case "$1" in -o) out="$2"; shift 2 ;; http*) url="$1"; shift ;; *) shift ;; esac; done
-echo "curl $url" >> "$FAKE_LOG"; [[ -n "$out" ]] && echo gguf > "$out"; exit 0

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Delegate"
-  short_description: "Route a token-heavy, low-reasoning task to a free local or cloud model"

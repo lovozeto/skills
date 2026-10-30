@@ -1,5 +1,0 @@
-interface:
-  display_name: "Arbitrate"
-  short_description: "Resolve a UX-vs-tech clash with a documented decision"
-policy:
-  allow_implicit_invocation: false

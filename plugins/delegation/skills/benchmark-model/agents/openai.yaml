@@ -1,5 +1,0 @@
-interface:
-  display_name: "Benchmark Model"
-  short_description: "Measure a model on the delegation benchmark and compare it"
-policy:
-  allow_implicit_invocation: false

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# Fake opencode: `models` lists ids; `run` echoes the model and the prompt it received.
-if [[ "$1" == "models" ]]; then
-  printf '%s\n' opencode/beam-free opencode/deepseek-v4.1-flash-free opencode/big-paid google/gemini-3.1-flash-lite
-  exit 0
-fi
-model=""; while [[ $# -gt 0 ]]; do [[ "$1" == "--model" ]] && model="$2"; shift; done
-bash_tool="$(python3 -c 'import json,os;print(json.load(open(os.environ["XDG_CONFIG_HOME"]+"/opencode/opencode.json"))["agent"]["lean"]["tools"].get("bash", True))')"
-echo "RAN model=$model bash=$bash_tool prompt=$(cat)"

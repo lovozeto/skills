@@ -1,5 +1,0 @@
-interface:
-  display_name: "Ask Wolf"
-  short_description: "Ask which skill or flow fits your situation across Esteban and Juandi's setup"
-policy:
-  allow_implicit_invocation: false
