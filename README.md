@@ -1,18 +1,19 @@
 # lovozeto/skills
 
-A collection of Claude Code skills for AI-assisted design and engineering workflows.
-
-> This repo is **public and distributable**: skills, the `skill-forge` plugin, and its
-> marketplace. Personal setup (profiles, machines, knowledge base, hooks, deploy script)
-> lives in a separate **private** repo, `lovozeto/lobomorir-ai-setup`, which installs this one.
+Claude Code skills for AI-assisted design and engineering. Public and distributable: the
+personal setup that uses them (profiles, machines, knowledge base, deploy script) lives in the
+private repo `lovozeto/lobomorir-ai-setup`, and this repo is its exported copy.
 
 ## Install
 
-```bash
-npx skills add lovozeto/skills
+As a Claude Code plugin (recommended: versioned, one command to update):
+
+```
+/plugin marketplace add lovozeto/skills
+/plugin install lovozeto-skills@lovozeto-skills
 ```
 
-Or globally (recommended — skills work across all projects):
+Or copy the skills into `~/.claude/skills` with the skills CLI:
 
 ```bash
 npx skills add lovozeto/skills -g -y
@@ -20,76 +21,50 @@ npx skills add lovozeto/skills -g -y
 
 ## Skills
 
-### Engineering
+### Knowledge base
 
 | Skill | What it does |
 |---|---|
-| `/commit` | Stage and commit following Conventional Commits |
-| `/arbitrate` | Resolve a clash between UX intent and a verified technical constraint |
-| `/init-project` | Initialize a repo for AI-assisted work: deps, CLAUDE.md, QUICK-STATE.md |
+| `ask-kb` | Looks up the team knowledge base with the `kb` CLI before a design or engineering decision, and answers with the rule and its ref. Model-invoked. |
+| `kb-curate` | Extracts atomic, sourced rules from one source at a time into the knowledge base, in the format `kb` indexes. |
 
-### Productivity
-
-| Skill | What it does |
-|---|---|
-| `/ask-wolf` | Router: which skill or flow fits your situation (manual) |
-| `/save-session` | Write end-of-session state, log PRs, or reconcile memory |
-| `/track-work` | Keep the GitHub issue and its board column current while you work |
-| `/resume-session` | Load QUICK-STATE.md and orient on what was happening and what comes next |
-| `/workspace-layout` | Map of `~/GitHub`: where to clone a repo and how to move one without breaking things |
-
-### Media
+### Reviews and QA
 
 | Skill | What it does |
 |---|---|
-| `/karaoke-builder` | Build/repair an UltraStar karaoke library — USDB / torrent (human-made) or AI (yt-dlp → demucs → forced alignment against verified lyrics), one validation pass |
-| `/inspecting-photo-archives` | Read-only metadata report for old photo/video folders (capture date, camera, timezone, lost dates, at-risk formats) before importing |
+| `qa-code` | Review the changes since a commit, branch or tag on two axes: the repo's coding standards and the originating spec. Parallel sub-agents, side-by-side report. |
+| `qa` | Strict technical audit: build, type check, imports, error and loading states, logic. Reports real failures only. |
+| `ux-review` | Evaluates flows, information hierarchy, mobile ergonomics (44 px targets), interaction clarity and dark patterns. |
+| `copy-review` | Audits and writes microcopy, error messages, button labels and interface text in the right tone. |
+| `vqa` | Visual QA across breakpoints (375, 768, 1280 px) and light/dark mode: misalignments, wrong fonts, regressions. |
+| `diagnosing-bugs` | Diagnosis loop for hard bugs and performance regressions, with a human-in-the-loop script template. |
 
-## Plugins
+### Design and build
 
-This repository is also a plugin marketplace (`.claude-plugin/marketplace.json`).
-
-| Plugin | What it does |
+| Skill | What it does |
 |---|---|
-| `skill-forge` | Guided wizard to design and build agents, skills, and plugins: zero-hole definition, complexity-based type decision, orchestrator + single-task subagents, guardrail hooks, a best-practices KB read from the global KB (`agent-building`), mandatory model per agent, and an HTML approval view. Supersedes `/workshop-skill`. |
-| `delegation` | Hand token-heavy, low-reasoning tasks to free models: text to local Ollama (`ask-local`), file work to an opencode agent, local when the material has data. Data scan before cloud calls, model allowlist, benchmark (`/delegation:benchmark-model`), machine setup (`/delegation:init`). Supersedes `/delegate`, `/write-for-model`, `/benchmark-model`. |
-| `agent-team` | Run a repo's work as tracked tickets through single-task agents: `run-task` (automatic) has `pm` draft each ticket as a GitHub issue, then dispatches plan, design, build and quality agents behind gates. Hooks guard write scopes, ticket verdicts, the owner's approval and knowledge freshness (`kb stale`). Active only in repos with `.claude/agent-team.json`. |
-| `knowledge-base` | Read, explain, correct, and research the global knowledge base with the `kb` CLI (`INDEX.md` fallback): `ask-knowledge-base` and `update-knowledge-base` (automatic), `/knowledge-base:kb-pipeline` (three gates, single-task agents). A hook asks before any write inside the KB outside `.raw/`. Supersedes `/ask-knowledge-base`, `/update-knowledge-base`, `/kb-pipeline`. |
+| `brand` | Generates and updates the project's brand guidelines: WCAG-checked palette, type scale, logo rules, spacing, do's and don'ts. |
+| `ui-spec` | Specifies UI decisions: hierarchy, type scale, AA palette, spacing, breakpoints, component states. |
+| `web-graphics` | Builds real-time interactive graphics (Canvas 2D, WebGL, Three.js, particles, animation) tuned for 60 fps. |
 
-```bash
-/plugin marketplace add lovozeto/skills
-/plugin install skill-forge@lovozeto-skills
-/plugin install delegation@lovozeto-skills
-/plugin install knowledge-base@lovozeto-skills
-/plugin install agent-team@lovozeto-skills
-```
+### Thinking and workflow
 
-See [`plugins/skill-forge/README.md`](plugins/skill-forge/README.md), [`plugins/delegation/README.md`](plugins/delegation/README.md), [`plugins/knowledge-base/README.md`](plugins/knowledge-base/README.md), and [`plugins/agent-team/README.md`](plugins/agent-team/README.md).
-
-## Setup
-
-Some skills require additional setup provided by
-[lobomorir-ai-setup](https://github.com/lovozeto/lobomorir-ai-setup):
-
-| Dependency | Used by |
+| Skill | What it does |
 |---|---|
-| Knowledge base readable with `kb` or at `$KB_ROOT` (base `delegation`, machine profile `hardware`) | `delegation` |
-| Knowledge base at `~/dev/claude-kb/` or `$KB_ROOT` (optional `kb` CLI) | `knowledge-base` (`ask-knowledge-base`, `update-knowledge-base`, `kb-pipeline`) |
-| `preflight` on PATH | `init-project` |
-| `gh` with a repo board (`setup-tracking`), `kb` CLI; optional `track-work` | `agent-team` |
+| `grill-me` | Stress-tests a plan, decision or idea with relentless questions. |
+| `kanban` | Organises ideas, tasks and progress on the project's board (GitHub Projects or `KANBAN.md`). |
+| `prompt-master` | Writes, fixes and adapts prompts for other AI tools (LLMs, Cursor, image models). From nidhinjs/prompt-master (MIT), pinned at 1.8.2. |
 
-Without that setup, skills fall back gracefully: `delegation` says its model choice is
-unmeasured and checks results more closely, and the `knowledge-base` skills fall back to
-`$KB_ROOT/INDEX.md` (default `~/dev/claude-kb/`) when `kb` is unavailable.
+## Setup some skills expect
 
-## Complementary: mattpocock/skills
+| Dependency | Used by | Provided by |
+|---|---|---|
+| The `kb` CLI on PATH and a knowledge base at `~/dev/claude-kb` (or `$KB_ROOT`) | `ask-kb`, `kb-curate` | `lovozeto/kb` + `lobomorir-ai-setup/sync.sh` |
 
-These skills work well alongside the curated selection from
-[mattpocock/skills](https://github.com/mattpocock/skills):
+Without it, `ask-kb` falls back to reading `INDEX.md` by hand, and `kb-curate` still writes
+files in the indexed format.
 
-```bash
-claude plugin marketplace add mattpocock/skills
-claude plugin install mattpocock-skills@mattpocock
-```
+## Develop
 
-Install it as a Claude Code plugin: `npx skills` does not link it into `~/.claude/skills`.
+Skills are edited in the private repo and exported here with `./sync.sh --export-public`.
+Maintenance rules: `CLAUDE.md`. Superseded skills: `_archive/`.
