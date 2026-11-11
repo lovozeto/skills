@@ -1,28 +1,14 @@
 {
   "name": "lovozeto-skills",
-  "owner": {
-    "name": "lovozeto"
-  },
+  "description": "lovozeto's Claude Code skills: one plugin that installs every skill in this repository.",
+  "owner": { "name": "lovozeto", "url": "https://github.com/lovozeto" },
   "plugins": [
     {
-      "name": "skill-forge",
-      "source": "./plugins/skill-forge",
-      "description": "Guided wizard to design and build agents, skills, and plugins with zero-hole definition, orchestrator + single-task subagents, guardrail hooks, a live best-practices KB, and an HTML approval view."
-    },
-    {
-      "name": "delegation",
-      "source": "./plugins/delegation",
-      "description": "Hand token-heavy, low-reasoning tasks to free models: text to local Ollama, file work to an opencode agent (local when the material has data, free cloud when it has none), with a data scan, a model allowlist and a benchmark."
-    },
-    {
-      "name": "knowledge-base",
-      "source": "./plugins/knowledge-base",
-      "description": "Read, explain, correct, and research the global knowledge base with the kb CLI (INDEX.md fallback), three-gate research pipeline with single-task agents, and a hook that asks before any KB write outside .raw/."
-    },
-    {
-      "name": "agent-team",
-      "source": "./plugins/agent-team",
-      "description": "Run a repo's work as tracked tickets (GitHub issues) through a team of single-task agents: run-task orchestrates plan, design, build and quality agents behind gates; hooks guard write scopes, ticket verdicts, owner approval and knowledge freshness (kb stale). Active only in repos with .claude/agent-team.json."
+      "name": "lovozeto-skills",
+      "source": "./",
+      "description": "All the skills in this repository (ask-kb, kb-curate, qa-code, qa, ux-review, ui-spec, copy-review, vqa, brand, web-graphics, diagnosing-bugs, grill-me, kanban, prompt-master).",
+      "version": "2.0.0",
+      "category": "productivity"
     }
   ]
 }

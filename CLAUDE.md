@@ -1,18 +1,21 @@
 # lovozeto/skills — maintenance rules
 
-When you add, rename, archive, or change how a skill is invoked, in the same change:
+This repo is the **public export** of `lobomorir-ai-setup/shared/skills` (private). Edit skills
+there and run `./sync.sh --export-public`; do not edit `skills/` here by hand, the next export
+overwrites it. Private skills (today: `karaoke-builder`) never land here.
 
-- **Router:** update `skills/productivity/ask-wolf/SKILL.md`. A router that names a missing
-  skill, or misses a new one, sends the user the wrong way.
+When a skill is added, renamed, archived, or changes how it is invoked, in the same change:
+
 - **README:** update the skill table in `README.md`.
-- **Invocation in sync:** a skill is user-invoked in both harnesses or neither:
-  `disable-model-invocation: true` in `SKILL.md` ⇔ `policy.allow_implicit_invocation: false`
-  in `agents/openai.yaml`. Every skill has an `agents/openai.yaml`.
+- **Invocation in sync:** a skill that is user-invoked only says `disable-model-invocation: true`
+  in `SKILL.md` and, when it ships an `agents/openai.yaml`, `policy.allow_implicit_invocation:
+  false` there. The two must agree. `agents/openai.yaml` is optional.
 - **Skill-to-skill steps** say `Call the Skill tool with "<name>"` and only target
   model-invoked skills; a user-invoked one is recommended to the human by its `/name`.
-- **Plugins:** after touching a manifest run `claude plugin validate plugins/<name>`, bump the
-  version and add a `CHANGELOG.md` entry.
+- **Plugin:** this repo is one plugin (`.claude-plugin/plugin.json`, served by
+  `.claude-plugin/marketplace.json`). After touching a manifest run `claude plugin validate .`
+  and bump `version` in both files.
 
 Superseded artifacts go to `_archive/` (see its README).
-New skills, agents, and plugins are built with `/forge-wizard` (plugin `skill-forge`).
+New skills are built with Anthropic's `skill-creator` skill (evals included).
 House conventions: `~/dev/claude-kb/CONVENTIONS.md`.
