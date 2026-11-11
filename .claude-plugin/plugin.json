@@ -1,0 +1,9 @@
+{
+  "name": "lovozeto-skills",
+  "version": "2.0.0",
+  "description": "Claude Code skills for AI-assisted design and engineering: knowledge-base lookup and curation, UX/UI/copy/visual reviews, QA, bug diagnosis, brand and UI specs, web graphics, prompt writing.",
+  "author": { "name": "lovozeto", "url": "https://github.com/lovozeto" },
+  "repository": "https://github.com/lovozeto/skills",
+  "license": "MIT",
+  "keywords": ["skills", "ux", "design", "knowledge-base", "qa", "review"]
+}

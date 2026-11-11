@@ -1,36 +1,65 @@
 ---
 name: kb-curate
-description: Extrae reglas atómicas y de alta fidelidad desde fuentes de documentación, URLs o artículos técnicos hacia la Base de Conocimiento (shared/claude-kb/).
+description: Extract atomic, sourced rules from a documentation page, article, standard or URL into the team's knowledge base in the format the `kb` CLI indexes. Use when the user shares a source and wants its principles captured, says "agrega esto a la KB", "curar", "extrae las reglas", or asks to correct or extend a KB file.
 model: sonnet
 ---
 
-# kb-curate — Extracción y Curaduría de Conocimiento Atómico
+# kb-curate — extraction into the knowledge base
 
-Usa esta skill cuando el usuario proporcione una fuente técnica (URL, artículo, estándar de diseño o documentación) y quiera extraer sus principios clave hacia la base de conocimiento (`shared/claude-kb/`).
+Turns one source at a time into atomic rules inside `$KB_ROOT` (default `~/dev/claude-kb`).
+**Model: Sonnet or better.** Rules are quoted facts; a light model paraphrases them wrong.
 
-**Modelo obligatorio:** Claude Sonnet (fidelidad textual y rigor analítico; nunca usar Haiku u otros modelos ligeros para evitar alucinaciones en reglas técnicas).
+## One source per pass
 
-## Aislamiento de Contexto y Calidad
+Read one publisher at a time and write only what that publisher says. Two philosophies in
+the same context get averaged into a rule nobody wrote. If the user gives several sources,
+do them one after another, each as its own pass.
 
-Para evitar contaminar el chat principal con páginas web masivas de 50.000 tokens:
-1. Lee la fuente en una pasada aislada.
-2. Extrae **únicamente reglas atómicas** (cada regla debe ser una sola viñeta concisa de ~50 tokens).
-3. Cada regla debe incluir su cita de procedencia exacta (Autor/Organización y URL).
+## The format `kb` indexes (follow it exactly)
 
-## Estructura de las Reglas Atómicas
+Each base is a folder (`ux/`, `ui/`, `accessibility/`, `content/`, `brand/`, `swift/`, …) and
+each file a topic. A file:
 
-Cada regla extraída debe seguir este formato exacto:
 ```markdown
-- `tema#sección` · [Regla clara y accionable en una o dos oraciones]. [Fuente: URL o Nombre]
+---
+summary: Forms: field design, validation, error messages, inline errors
+tier: advisory            # advisory = from docs; proven = measured on this machine
+last_verified: 2026-11-10
+review_by: 2027-05-10     # kb stale flags the file after this date
+sources:
+  - publisher: GOV.UK Design System
+    url: https://design-system.service.gov.uk/patterns/validation/
+---
+
+# Forms
+
+## Validation
+<!-- tags: topic=forms,error-handling; platform=web; concern=a11y; keywords=error summary, inline error -->
+- Show the error next to the field and repeat it in a summary at the top of the page. [GOV.UK: https://design-system.service.gov.uk/patterns/validation/]
+- Validate on submit, not while the user is still typing. [GOV.UK: https://design-system.service.gov.uk/patterns/validation/]
 ```
 
-Ejemplo:
-```markdown
-- `usability-heuristics#error-messages` · Usa un tono descriptivo que no culpe al usuario y evita el humor en situaciones de fallo. [NN/g: https://www.nngroup.com/articles/error-message-guidelines/]
-```
+Rules of the format:
 
-## Proceso de Guardado
+- A rule is one `- ` bullet, one or two sentences (~50 tokens), actionable, with its source
+  in a trailing `[Publisher: url]`. No prefix, no ref inside the bullet.
+- `##` sections carry a `<!-- tags: … -->` line. `topic`, `platform` and `concern` values
+  must exist in `TAXONOMY.md`; `keywords` is free text. A `###` inherits its parent's tags.
+- Keep the raw capture (what you read, lightly cleaned) in `<base>/.raw/<publisher>.md` as the
+  audit trail. `.raw/` is indexed only with `--raw`.
+- Register the publisher once in `sources.yml` if it is new.
+- Our own decisions go in `CONVENTIONS.md` (`kind: decisions`), dated instead of sourced.
 
-1. Identifica a qué base temática pertenece (ej. `ux/`, `ui/`, `accessibility/`, `web-patterns/`, `cpp/`, `swift/`).
-2. Agrega o actualiza la sección correspondiente dentro de `${KB_ROOT:-~/dev/claude-kb}/<base>/<archivo>.md`.
-3. Notifica al usuario en una sola línea de resumen con las reglas añadidas.
+## Procedure
+
+1. Decide the base and file: `kb search "<topic>"` to see where similar rules live. Extend an
+   existing file before creating one.
+2. Read the source once, in an isolated pass if it is long (a subagent that returns only the
+   rules keeps 50k tokens of page out of this context).
+3. Write or update the file: frontmatter (`summary`, `tier`, dates, `sources`), tagged
+   sections, sourced bullets. Save the raw capture.
+4. When a new rule contradicts an existing one from another publisher, keep both, and set
+   `status: ambiguous` in the frontmatter so `kb stale` surfaces the file for the owner.
+5. Regenerate the router and lint: `kb router --write && kb lint`. Fix every error; report
+   the warnings that remain.
+6. Tell the user in one line: file, sections touched, number of rules, lint result.

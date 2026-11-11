@@ -1,26 +1,21 @@
 # _archive
 
-Superseded artifacts kept for reference and history. Nothing here is active — skills and
-plugins in this folder are **not** meant to trigger or be installed.
+Superseded artifacts kept for reference and history. Nothing here is active: skills in this
+folder are **not** meant to trigger or be installed.
 
 ## Convention
 
-When a skill/agent/plugin is replaced, it is **moved here** (never deleted), mirroring its
-original path so provenance is obvious. Example:
-
-```
-skills/engineering/workshop-skill/   →   _archive/skills/engineering/workshop-skill/
-```
-
-Use `git mv` so history is preserved. Add a short note at the top of the moved artifact
-stating what replaced it and when.
-
-The `skill-forge` plugin is aware of this convention: when its wizard replaces an existing
-artifact, it moves the old one here instead of deleting it.
+When a skill is replaced, it is **moved here** (never deleted), mirroring its original path so
+provenance is obvious. Use `git mv` so history is preserved, and add a short note at the top
+of the moved artifact stating what replaced it and when.
 
 ## Contents
 
 | Archived | Replaced by | When |
 |---|---|---|
-| `skills/engineering/workshop-skill/` | `plugins/skill-forge/` (`/forge-wizard`) | 2026-08-21 |
-| `skills/engineering/delegate/`, `write-for-model/`, `benchmark-model/` | `plugins/delegation/` | 2026-10-28 |
+| `skills/engineering/workshop-skill/` | Anthropic's `skill-creator` skill | 2026-08-21 |
+
+Deleted outright on 2026-11-10 (still in git history): the delegation skills (`delegate`,
+`write-for-model`, `benchmark-model`) and the `skill-forge`, `delegation`, `knowledge-base`
+and `agent-team` plugins. The team no longer routes work to other models, and `ask-kb` and
+`kb-curate` replace the knowledge-base plugin.
